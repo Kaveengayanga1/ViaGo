@@ -1,0 +1,46 @@
+spring :
+  datasource:
+    url : "#{environment.DB_URL + environment.DB_NAME}"
+    username : ${DB_USERNAME}
+    password : ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa :
+    hibernate :
+      ddl-auto : update
+
+  jwt:
+    secret: ${JWT_SECRET}
+
+user-service:
+  url: ${USER_SERVICE_URL:http://localhost}
+  port: ${USER_SERVICE_PORT:8081}
+
+
+#  kafka:
+#    bootstrap-servers: localhost:9092
+#    consumer:
+#      group-id: user-signup-group
+#      auto-offset-reset: earliest
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#
+#  mail:
+#    host: smtp.ethereal.email
+#    port: 2525
+#    username: conner.homenick25@ethereal.email
+#    password: FvrgrmphQkk4XrFyGj
+#    properties:
+#      mail:
+#        smtp:
+#          auth:true
+#        starttls:
+#          enable:true
+#
+#  app:
+#    kafka:
+#      topic:
+#        user-signup: user-signup-topic
