@@ -18,8 +18,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.*;
 
 import java.time.OffsetDateTime;
@@ -182,19 +186,47 @@ public class UserServiceImpl implements UserService {
     //Done
     @Override
     public AuthResponse loginUser(LoginRequest loginRequest) {
-
+        // Input validation
         String identifier = loginRequest.getIdentifier();
+        String password = loginRequest.getPassword();
+        
+        if (identifier == null || identifier.trim().isEmpty()) {
+            log.warn("Login failed: identifier is null or empty");
+            return AuthResponse.builder()
+                    .success(false)
+                    .message("identifier_required")
+                    .jwtToken(null)
+                    .refreshToken(null)
+                    .tokenType(null)
+                    .expiresIn(null)
+                    .timestamp(OffsetDateTime.now())
+                    .data(null)
+                    .build();
+        }
+        
+        if (password == null || password.trim().isEmpty()) {
+            log.warn("Login failed: password is null or empty for identifier: {}", identifier);
+            return AuthResponse.builder()
+                    .success(false)
+                    .message("password_required")
+                    .jwtToken(null)
+                    .refreshToken(null)
+                    .tokenType(null)
+                    .expiresIn(null)
+                    .timestamp(OffsetDateTime.now())
+                    .data(null)
+                    .build();
+        }
+        
         log.info("Login attempt for identifier: {}", identifier);
 
-        // Find user by email or username
-        UserEntity entity = userRepository.findUserEntityByEmailIgnoreCase(identifier);
-
-        if (entity == null) {
-            entity = userRepository.findUserEntityByUsernameIgnoreCase(identifier);
-        }
+        // Find user by email or username in single optimized query
+        Optional<UserEntity> userOptional = userRepository.findByEmailOrUsernameIgnoreCase(
+                identifier.trim()
+        );
 
         // If user does not exist
-        if (entity == null) {
+        if (userOptional.isEmpty()) {
             log.warn("Login failed: user not found for identifier: {}", identifier);
             return AuthResponse.builder()
                     .success(false)
@@ -203,21 +235,30 @@ public class UserServiceImpl implements UserService {
                     .refreshToken(null)
                     .tokenType(null)
                     .expiresIn(null)
+                    .timestamp(OffsetDateTime.now())
                     .data(null)
                     .build();
         }
 
-        // Authenticate credentials
+        UserEntity entity = userOptional.get();
+        
+        // CRITICAL FIX: Use entity's email for authentication instead of identifier
+        // This fixes the bug where username login fails because CustomUserDetailService
+        // only searches by email, not username
+        String userEmail = entity.getEmail();
+
+        // Authenticate credentials using the user's email
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            identifier,
-                            loginRequest.getPassword()
+                            userEmail,  // Use email instead of identifier
+                            password
                     )
             );
         } catch (Exception ex) {
-            log.warn("Login failed for identifier {} - invalid credentials", identifier);
+            log.warn("Login failed for identifier {} (email: {}) - invalid credentials: {}", 
+                    identifier, userEmail, ex.getMessage());
             return AuthResponse.builder()
                     .success(false)
                     .message("invalid_credential")
@@ -225,6 +266,7 @@ public class UserServiceImpl implements UserService {
                     .refreshToken(null)
                     .tokenType(null)
                     .expiresIn(null)
+                    .timestamp(OffsetDateTime.now())
                     .data(null)
                     .build();
         }
@@ -236,8 +278,8 @@ public class UserServiceImpl implements UserService {
 
             String jwtToken = jwtService.generateJwtToken(userDTO);
 
-            log.info("Login successful for userId={} | email={} | role={}",
-                    userDTO.getUserId(), userDTO.getEmail(), userDTO.getRole());
+            log.info("Login successful for userId={} | email={} | role={} | identifier={}",
+                    userDTO.getUserId(), userDTO.getEmail(), userDTO.getRole(), identifier);
             return AuthResponse.builder()
                     .success(true)
                     .message("login_success")
@@ -254,11 +296,12 @@ public class UserServiceImpl implements UserService {
         log.warn("Login unsuccessful for identifier {}", identifier);
         return AuthResponse.builder()
                 .success(false)
-                .message("un_successful")
+                .message("authentication_failed")
                 .jwtToken(null)
                 .refreshToken(null)
                 .tokenType(null)
                 .expiresIn(null)
+                .timestamp(OffsetDateTime.now())
                 .data(null)
                 .build();
     }
@@ -267,37 +310,110 @@ public class UserServiceImpl implements UserService {
     //    +------------------+
     //Done
     @Override
+    @Transactional
     public ResponseEntity<UserResponse<Object>> removeUser(Long userId) {
+        // Input validation
+        if (userId == null) {
+            log.warn("Account delete failed: userId is null");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(
+                            UserResponse.builder()
+                                    .success(false)
+                                    .message("user_id_required")
+                                    .timestamp(OffsetDateTime.now())
+                                    .build()
+                    );
+        }
+        
         log.info("Account delete attempt for userId: {}", userId);
+        
         if (!userRepository.existsByUserId(userId)){
-            log.info("Account delete failed: user not exists for userId= {}", userId);
+            log.warn("Account delete failed: user does not exist for userId: {}", userId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(
                             UserResponse.builder()
                                     .success(false)
-                                    .message("user_not_exists")
+                                    .message("user_not_found")
+                                    .timestamp(OffsetDateTime.now())
                                     .build()
                     );
-
         }
+        
         try{
             userRepository.deleteById(userId);
             log.info("Account delete success for userId: {}", userId);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body(
                             UserResponse.builder()
                                     .success(true)
                                     .message("user_deleted")
+                                    .timestamp(OffsetDateTime.now())
                                     .build()
                     );
         }catch (Exception e){
-            log.info("Account delete failed for userId: {} exception occurred", userId);
+            log.error("Account delete failed for userId: {} - exception: {}", userId, e.getMessage(), e);
             return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(
                             UserResponse.builder()
                                     .success(false)
                                     .message("delete_exception")
+                                    .timestamp(OffsetDateTime.now())
+                                    .build()
+                    );
+        }
+    }
+    
+    @Override
+    @Transactional
+    public ResponseEntity<UserResponse<Object>> removeUserByEmail(String email) {
+        // Input validation
+        if (email == null || email.trim().isEmpty()) {
+            log.warn("Account delete failed: email is null or empty");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(
+                            UserResponse.builder()
+                                    .success(false)
+                                    .message("email_required")
+                                    .timestamp(OffsetDateTime.now())
+                                    .build()
+                    );
+        }
+        
+        log.info("Account delete attempt for email: {}", email);
+        
+        if (!userRepository.existsByEmailIgnoreCase(email.trim())){
+            log.warn("Account delete failed: user does not exist for email: {}", email);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(
+                            UserResponse.builder()
+                                    .success(false)
+                                    .message("user_not_found")
+                                    .timestamp(OffsetDateTime.now())
+                                    .build()
+                    );
+        }
+        
+        try{
+            userRepository.deleteByEmailIgnoreCase(email.trim());
+            log.info("Account delete success for email: {}", email);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(
+                            UserResponse.builder()
+                                    .success(true)
+                                    .message("user_deleted")
+                                    .timestamp(OffsetDateTime.now())
+                                    .build()
+                    );
+        }catch (Exception e){
+            log.error("Account delete failed for email: {} - exception: {}", email, e.getMessage(), e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                            UserResponse.builder()
+                                    .success(false)
+                                    .message("delete_exception")
+                                    .timestamp(OffsetDateTime.now())
                                     .build()
                     );
         }
@@ -345,56 +461,182 @@ public class UserServiceImpl implements UserService {
     //Done
     @Override
     public ResponseEntity<UserResponse> getAllUsers() {
-        ArrayList<UserDTO> userDTOList = new ArrayList<>();
-
-        Iterable<UserEntity> userIterable = userRepository.findAll();
-        for (UserEntity userEntity : userIterable) {
-            userDTOList.add(
-                    UserDTO.builder()
-                            .username(userEntity.getUsername())
-                            .role(userEntity.getRole())
-                            .email(userEntity.getEmail())
+        // Default implementation without pagination for backward compatibility
+        return getAllUsers(null, null);
+    }
+    
+    @Override
+    public ResponseEntity<UserResponse> getAllUsers(Integer page, Integer size) {
+        log.info("Get all users request - page: {}, size: {}", page, size);
+        
+        List<UserDTO> userDTOList;
+        
+        // Use pagination if page and size are provided
+        if (page != null && size != null && page >= 0 && size > 0) {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<UserEntity> userPage = userRepository.findAll(pageable);
+            
+            userDTOList = userPage.getContent()
+                    .stream()
+                    .map(userEntity -> UserDTO.builder()
                             .userId(userEntity.getUserId())
-                            .build());
+                            .username(userEntity.getUsername())
+                            .email(userEntity.getEmail())
+                            .role(userEntity.getRole())
+                            .build())
+                    .toList();
+            
+            log.info("Retrieved {} users (page {} of {}, total: {})", 
+                    userDTOList.size(), page, userPage.getTotalPages(), userPage.getTotalElements());
+        } else {
+            // Fallback to non-paginated for backward compatibility
+            Iterable<UserEntity> userIterable = userRepository.findAll();
+            userDTOList = new ArrayList<>();
+            for (UserEntity userEntity : userIterable) {
+                userDTOList.add(
+                        UserDTO.builder()
+                                .userId(userEntity.getUserId())
+                                .username(userEntity.getUsername())
+                                .email(userEntity.getEmail())
+                                .role(userEntity.getRole())
+                                .build());
+            }
+            log.info("Retrieved {} users (no pagination)", userDTOList.size());
         }
+        
         return ResponseEntity.ok(
                 UserResponse.builder()
                         .success(true)
                         .message("user_list")
                         .data(userDTOList)
+                        .timestamp(OffsetDateTime.now())
                         .build()
         );
     }
     //Done
     @Override
     public ResponseEntity<UserResponse<Object>> getUserByEmail(String email) {
-        UserEntity entity = userRepository.findUserEntityByEmailIgnoreCase(email);
+        // Input validation
+        if (email == null || email.trim().isEmpty()) {
+            log.warn("Get user by email failed: email is null or empty");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(
+                            UserResponse.builder()
+                                    .success(false)
+                                    .message("email_required")
+                                    .timestamp(OffsetDateTime.now())
+                                    .build()
+                    );
+        }
+        
+        log.info("Get user by email request: {}", email);
+        
+        Optional<UserEntity> entityOptional = userRepository.findByEmailIgnoreCase(email.trim());
+        
+        if (entityOptional.isEmpty()) {
+            log.warn("User not found for email: {}", email);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(
+                            UserResponse.builder()
+                                    .success(false)
+                                    .message("user_not_found")
+                                    .timestamp(OffsetDateTime.now())
+                                    .build()
+                    );
+        }
+        
+        UserEntity entity = entityOptional.get();
         UserDTO userDTO = objectMapper.convertValue(entity, UserDTO.class);
         userDTO.setPassword(null);
+        
+        log.info("User found for email: {} | userId: {}", email, userDTO.getUserId());
         return ResponseEntity.ok(
                 UserResponse.builder()
                         .success(true)
-                        .message("user_list")
+                        .message("user_found")
                         .data(userDTO)
+                        .timestamp(OffsetDateTime.now())
                         .build()
         );
     }
     @Override
     public ResponseEntity<UserResponse> getUserListByRole(String role) {
-        List<UserDTO> userList = userRepository.findByRole(Role.valueOf(role.toUpperCase()))
-                .stream()
-                .map(entity -> UserDTO.builder()
-                        .userId(entity.getUserId())
-                        .email(entity.getEmail())
-                        .username(entity.getUsername())
-                        .role(entity.getRole())
-                        .build())
-                .toList();
+        // Default implementation without pagination for backward compatibility
+        return getUserListByRole(role, null, null);
+    }
+    
+    @Override
+    public ResponseEntity<UserResponse> getUserListByRole(String role, Integer page, Integer size) {
+        // Input validation
+        if (role == null || role.trim().isEmpty()) {
+            log.warn("Get user list by role failed: role is null or empty");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(
+                            UserResponse.builder()
+                                    .success(false)
+                                    .message("role_required")
+                                    .timestamp(OffsetDateTime.now())
+                                    .build()
+                    );
+        }
+        
+        log.info("Get user list by role request: {} (page: {}, size: {})", role, page, size);
+        
+        Role roleEnum;
+        try {
+            roleEnum = Role.valueOf(role.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid role provided: {}", role);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(
+                            UserResponse.builder()
+                                    .success(false)
+                                    .message("invalid_role")
+                                    .timestamp(OffsetDateTime.now())
+                                    .build()
+                    );
+        }
+        
+        List<UserDTO> userList;
+        
+        // Use pagination if page and size are provided
+        if (page != null && size != null && page >= 0 && size > 0) {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<UserEntity> userPage = userRepository.findByRole(roleEnum, pageable);
+            
+            userList = userPage.getContent()
+                    .stream()
+                    .map(entity -> UserDTO.builder()
+                            .userId(entity.getUserId())
+                            .email(entity.getEmail())
+                            .username(entity.getUsername())
+                            .role(entity.getRole())
+                            .build())
+                    .toList();
+            
+            log.info("Retrieved {} users with role {} (page {} of {}, total: {})", 
+                    userList.size(), role, page, userPage.getTotalPages(), userPage.getTotalElements());
+        } else {
+            // Fallback to non-paginated for backward compatibility
+            List<UserEntity> entities = userRepository.findByRole(roleEnum);
+            userList = entities.stream()
+                    .map(entity -> UserDTO.builder()
+                            .userId(entity.getUserId())
+                            .email(entity.getEmail())
+                            .username(entity.getUsername())
+                            .role(entity.getRole())
+                            .build())
+                    .toList();
+            
+            log.info("Retrieved {} users with role {} (no pagination)", userList.size(), role);
+        }
+        
         return ResponseEntity.ok(
                 UserResponse.builder()
                         .success(true)
                         .message("user_list")
                         .data(userList)
+                        .timestamp(OffsetDateTime.now())
                         .build()
         );
     }
