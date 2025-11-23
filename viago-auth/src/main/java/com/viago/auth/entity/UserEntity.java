@@ -32,6 +32,10 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    // OAuth2 Provider Information
+    private String provider; // e.g., "google"
+    private String providerId; // OAuth2 provider's user ID (e.g., Google sub)
+
     //Emai Verification
     private boolean enabled = true;
 

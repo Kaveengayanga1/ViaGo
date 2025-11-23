@@ -13,6 +13,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -26,10 +28,20 @@ public class SecurityConfig {
 
     private UserDetailsService userDetailsService;
     private JwtFilter jwtFilter;
+    private OAuth2UserService<org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest, OAuth2User> oAuth2UserService;
+    private OAuth2RoutingSuccessHandler oAuth2RoutingSuccessHandler;
+    private OAuth2FailureHandler oAuth2FailureHandler;
 
-    public SecurityConfig(UserDetailsService userDetailsService,JwtFilter jwtFilter) {
+    public SecurityConfig(UserDetailsService userDetailsService,
+                         JwtFilter jwtFilter,
+                         OAuth2UserService<org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest, OAuth2User> oAuth2UserService,
+                         OAuth2RoutingSuccessHandler oAuth2RoutingSuccessHandler,
+                         OAuth2FailureHandler oAuth2FailureHandler) {
         this.userDetailsService = userDetailsService;
         this.jwtFilter = jwtFilter;
+        this.oAuth2UserService = oAuth2UserService;
+        this.oAuth2RoutingSuccessHandler = oAuth2RoutingSuccessHandler;
+        this.oAuth2FailureHandler = oAuth2FailureHandler;
     }
 
     @Bean
@@ -47,11 +59,17 @@ public class SecurityConfig {
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/auth/**").permitAll() //access for everyone
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll() // OAuth2 endpoints
                         .requestMatchers("/user/**").hasAnyRole("RIDER","ADMIN")
 //                        .requestMatchers("/event/get-all-events").hasAnyRole("USER","ADMIN")
 //                        .requestMatchers("/event/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(oAuth2UserService))
+                        .successHandler(oAuth2RoutingSuccessHandler)
+                        .failureHandler(oAuth2FailureHandler))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

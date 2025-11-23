@@ -37,5 +37,9 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity,Lo
     
     // Method to check if user exists by email
     boolean existsByEmailIgnoreCase(String email);
+    
+    // OAuth2 methods
+    Optional<UserEntity> findByEmailAndProvider(String email, String provider);
+    Optional<UserEntity> findByProviderId(String providerId);
 
 }
