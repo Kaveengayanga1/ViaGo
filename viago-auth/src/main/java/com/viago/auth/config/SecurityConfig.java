@@ -60,7 +60,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/auth/**").permitAll() //access for everyone
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll() // OAuth2 endpoints
-                        .requestMatchers("/user/**").hasAnyRole("RIDER","ADMIN")
+                        .requestMatchers("/user/**").hasAnyRole("RIDER","ADMIN","DRIVER")
 //                        .requestMatchers("/event/get-all-events").hasAnyRole("USER","ADMIN")
 //                        .requestMatchers("/event/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

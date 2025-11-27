@@ -15,5 +15,6 @@ public class UserDTO {
     private String password;
     private String email;
     private Role role;
-
+    private VehicleDTO vehicle;
+    private Boolean enabled;
 }

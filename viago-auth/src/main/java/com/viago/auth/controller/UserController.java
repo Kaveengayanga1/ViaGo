@@ -44,6 +44,12 @@ public class UserController {
     public ResponseEntity<UserResponse> updateUser(@RequestBody UserDTO userDTO) {
         return userService.updateUser(userDTO);
     }
+
+    @PatchMapping("/status")
+    public ResponseEntity<UserResponse<Object>> updateUserStatus(@RequestParam Long userId,
+                                                                 @RequestParam boolean enabled) {
+        return userService.updateUserStatus(userId, enabled);
+    }
     //for testing purpose
     @GetMapping("/hello")
     public String sayHello(){

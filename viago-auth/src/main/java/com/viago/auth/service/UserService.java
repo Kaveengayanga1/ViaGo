@@ -17,4 +17,5 @@ public interface UserService {
     public ResponseEntity<UserResponse<Object>> getUserByEmail(String email);
     public ResponseEntity<UserResponse> getUserListByRole(String role);
     public ResponseEntity<UserResponse> getUserListByRole(String role, Integer page, Integer size);
+    public ResponseEntity<UserResponse<Object>> updateUserStatus(Long userId, boolean enabled);
 }

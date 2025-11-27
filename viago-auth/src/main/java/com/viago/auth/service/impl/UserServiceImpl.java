@@ -3,11 +3,14 @@ package com.viago.auth.service.impl;
 
 import com.viago.auth.dto.Role;
 import com.viago.auth.dto.UserDTO;
+import com.viago.auth.dto.VehicleDTO;
 import com.viago.auth.dto.request.LoginRequest;
 import com.viago.auth.dto.response.AuthResponse;
 import com.viago.auth.dto.response.UserResponse;
 import com.viago.auth.entity.UserEntity;
+import com.viago.auth.entity.VehicleEntity;
 import com.viago.auth.repository.UserRepository;
+import com.viago.auth.repository.VehicleRepository;
 import com.viago.auth.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
@@ -30,12 +33,16 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
 
+    private static final Set<Integer> ALLOWED_SEAT_COUNTS = Set.of(1, 3, 5, 8);
+
     UserRepository userRepository;
+    VehicleRepository vehicleRepository;
     PasswordEncoder passwordEncoder;
     ObjectMapper objectMapper;
     AuthenticationManager authenticationManager;
@@ -48,6 +55,7 @@ public class UserServiceImpl implements UserService {
     private String userServicePort;
 
     public UserServiceImpl(UserRepository userRepository,
+                           VehicleRepository vehicleRepository,
                            PasswordEncoder passwordEncoder,
                            AuthenticationManager authenticationManager,
                            JwtServiceImpl jwtService,
@@ -55,6 +63,7 @@ public class UserServiceImpl implements UserService {
                            ObjectMapper objectMapper
                            ) {
         this.userRepository = userRepository;
+        this.vehicleRepository = vehicleRepository;
         this.passwordEncoder = passwordEncoder;
         this.objectMapper = objectMapper;
         this.authenticationManager = authenticationManager;
@@ -68,6 +77,7 @@ public class UserServiceImpl implements UserService {
     //    +------------------+
     //Done
     @Override
+    @Transactional
     public AuthResponse addUser(UserDTO userDTO) {
         log.info("Signup attempt for identifier: {}", userDTO.getEmail());
 
@@ -85,11 +95,104 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
 
+        VehicleEntity vehicleEntity = null;
+        if (userDTO.getRole() == Role.DRIVER) {
+            VehicleDTO vehicleDTO = userDTO.getVehicle();
+
+            if (vehicleDTO == null) {
+                log.warn("Driver signup failed for email {} - vehicle missing", userDTO.getEmail());
+                return AuthResponse.builder()
+                        .success(false)
+                        .message("vehicle_required_for_driver")
+                        .jwtToken(null)
+                        .refreshToken(null)
+                        .tokenType(null)
+                        .expiresIn(null)
+                        .timestamp(OffsetDateTime.now())
+                        .data(null)
+                        .build();
+            }
+
+            if (vehicleDTO.getVehicleType() == null || vehicleDTO.getVehicleType().trim().isEmpty()) {
+                return AuthResponse.builder()
+                        .success(false)
+                        .message("vehicle_type_required")
+                        .jwtToken(null)
+                        .refreshToken(null)
+                        .tokenType(null)
+                        .expiresIn(null)
+                        .timestamp(OffsetDateTime.now())
+                        .data(null)
+                        .build();
+            }
+
+            if (vehicleDTO.getModel() == null || vehicleDTO.getModel().trim().isEmpty()) {
+                return AuthResponse.builder()
+                        .success(false)
+                        .message("vehicle_model_required")
+                        .jwtToken(null)
+                        .refreshToken(null)
+                        .tokenType(null)
+                        .expiresIn(null)
+                        .timestamp(OffsetDateTime.now())
+                        .data(null)
+                        .build();
+            }
+
+            if (vehicleDTO.getSeatCount() == null || !ALLOWED_SEAT_COUNTS.contains(vehicleDTO.getSeatCount())) {
+                return AuthResponse.builder()
+                        .success(false)
+                        .message("vehicle_seat_invalid")
+                        .jwtToken(null)
+                        .refreshToken(null)
+                        .tokenType(null)
+                        .expiresIn(null)
+                        .timestamp(OffsetDateTime.now())
+                        .data(null)
+                        .build();
+            }
+
+            if (vehicleDTO.getRegistrationNumber() == null || vehicleDTO.getRegistrationNumber().trim().isEmpty()) {
+                return AuthResponse.builder()
+                        .success(false)
+                        .message("vehicle_registration_required")
+                        .jwtToken(null)
+                        .refreshToken(null)
+                        .tokenType(null)
+                        .expiresIn(null)
+                        .timestamp(OffsetDateTime.now())
+                        .data(null)
+                        .build();
+            }
+
+            String normalizedRegNumber = vehicleDTO.getRegistrationNumber().trim().toUpperCase();
+            if (vehicleRepository.existsByRegistrationNumberIgnoreCase(normalizedRegNumber)) {
+                return AuthResponse.builder()
+                        .success(false)
+                        .message("vehicle_registration_in_use")
+                        .jwtToken(null)
+                        .refreshToken(null)
+                        .tokenType(null)
+                        .expiresIn(null)
+                        .timestamp(OffsetDateTime.now())
+                        .data(null)
+                        .build();
+            }
+
+            vehicleEntity = VehicleEntity.builder()
+                    .vehicleType(vehicleDTO.getVehicleType().trim())
+                    .model(vehicleDTO.getModel().trim())
+                    .seatCount(vehicleDTO.getSeatCount())
+                    .registrationNumber(normalizedRegNumber)
+                    .build();
+        }
+
         UserEntity userEntity = UserEntity.builder()
                 .username(userDTO.getUsername())
                 .email(userDTO.getEmail())
                 .password(passwordEncoder.encode(userDTO.getPassword()))
                 .role(userDTO.getRole())
+                .enabled(userDTO.getEnabled() == null || userDTO.getEnabled())
                 .build();
 
 //        UserProfileDTO userProfileDTO = UserProfileDTO.builder()
@@ -100,8 +203,14 @@ public class UserServiceImpl implements UserService {
 //                .build();
 
         try {
-            userRepository.save(userEntity);
-            log.info("User created for email: {} | userId: {} | role: {}", userEntity.getEmail(), userEntity.getUserId(), userDTO.getRole());
+            UserEntity savedUser = userRepository.save(userEntity);
+            if (vehicleEntity != null) {
+                vehicleEntity.setDriver(savedUser);
+                vehicleRepository.save(vehicleEntity);
+                log.info("Vehicle registered for driverId={} | registration={}",
+                        savedUser.getUserId(), vehicleEntity.getRegistrationNumber());
+            }
+            log.info("User created for email: {} | userId: {} | role: {}", savedUser.getEmail(), savedUser.getUserId(), userDTO.getRole());
 
 //            String url = userServiceURL + ":" + userServicePort + "/profile/create";
 //            log.info("Use rest template to send profile using url: {}",url);
@@ -326,8 +435,9 @@ public class UserServiceImpl implements UserService {
         }
         
         log.info("Account delete attempt for userId: {}", userId);
-        
-        if (!userRepository.existsByUserId(userId)){
+
+        Optional<UserEntity> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
             log.warn("Account delete failed: user does not exist for userId: {}", userId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(
@@ -338,9 +448,11 @@ public class UserServiceImpl implements UserService {
                                     .build()
                     );
         }
-        
+
+        UserEntity userEntity = userOptional.get();
         try{
-            userRepository.deleteById(userId);
+            deleteDriverVehicleIfExists(userEntity);
+            userRepository.delete(userEntity);
             log.info("Account delete success for userId: {}", userId);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(
@@ -381,8 +493,9 @@ public class UserServiceImpl implements UserService {
         }
         
         log.info("Account delete attempt for email: {}", email);
-        
-        if (!userRepository.existsByEmailIgnoreCase(email.trim())){
+
+        Optional<UserEntity> userOptional = userRepository.findByEmailIgnoreCase(email.trim());
+        if (userOptional.isEmpty()){
             log.warn("Account delete failed: user does not exist for email: {}", email);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(
@@ -393,9 +506,11 @@ public class UserServiceImpl implements UserService {
                                     .build()
                     );
         }
-        
+
+        UserEntity userEntity = userOptional.get();
         try{
-            userRepository.deleteByEmailIgnoreCase(email.trim());
+            deleteDriverVehicleIfExists(userEntity);
+            userRepository.delete(userEntity);
             log.info("Account delete success for email: {}", email);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(
@@ -435,6 +550,9 @@ public class UserServiceImpl implements UserService {
         userEntity.setEmail(userDTO.getEmail());
         userEntity.setUsername(userDTO.getUsername());
         userEntity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        if (userDTO.getEnabled() != null) {
+            userEntity.setEnabled(userDTO.getEnabled());
+        }
 
         try {
             userRepository.save(userEntity);
@@ -453,6 +571,45 @@ public class UserServiceImpl implements UserService {
                                     .build()
                     );
         }
+    }
+
+    @Override
+    public ResponseEntity<UserResponse<Object>> updateUserStatus(Long userId, boolean enabled) {
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(
+                            UserResponse.builder()
+                                    .success(false)
+                                    .message("user_id_required")
+                                    .timestamp(OffsetDateTime.now())
+                                    .build()
+                    );
+        }
+
+        Optional<UserEntity> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(
+                            UserResponse.builder()
+                                    .success(false)
+                                    .message("user_not_found")
+                                    .timestamp(OffsetDateTime.now())
+                                    .build()
+                    );
+        }
+
+        UserEntity userEntity = userOptional.get();
+        userEntity.setEnabled(enabled);
+        userRepository.save(userEntity);
+        log.info("User status updated for userId={} | enabled={}", userId, enabled);
+
+        return ResponseEntity.ok(
+                UserResponse.builder()
+                        .success(true)
+                        .message(enabled ? "user_enabled" : "user_disabled")
+                        .timestamp(OffsetDateTime.now())
+                        .build()
+        );
     }
 
     //    +------------------+
@@ -483,6 +640,7 @@ public class UserServiceImpl implements UserService {
                             .username(userEntity.getUsername())
                             .email(userEntity.getEmail())
                             .role(userEntity.getRole())
+                            .enabled(userEntity.isEnabled())
                             .build())
                     .toList();
             
@@ -499,6 +657,7 @@ public class UserServiceImpl implements UserService {
                                 .username(userEntity.getUsername())
                                 .email(userEntity.getEmail())
                                 .role(userEntity.getRole())
+                                .enabled(userEntity.isEnabled())
                                 .build());
             }
             log.info("Retrieved {} users (no pagination)", userDTOList.size());
@@ -611,6 +770,7 @@ public class UserServiceImpl implements UserService {
                             .email(entity.getEmail())
                             .username(entity.getUsername())
                             .role(entity.getRole())
+                            .enabled(entity.isEnabled())
                             .build())
                     .toList();
             
@@ -625,6 +785,7 @@ public class UserServiceImpl implements UserService {
                             .email(entity.getEmail())
                             .username(entity.getUsername())
                             .role(entity.getRole())
+                            .enabled(entity.isEnabled())
                             .build())
                     .toList();
             
@@ -644,6 +805,102 @@ public class UserServiceImpl implements UserService {
     @PostConstruct
     public void init() {
         log.info("User service url set to {}:{}", userServiceURL, userServicePort);
+    }
+    @PostConstruct
+    private void seedSampleUsers() {
+        long existingCount = userRepository.count();
+        log.info("Sample data seed check -> existing users: {}", existingCount);
+
+        final int targetSampleCount = 90;
+        if (existingCount >= targetSampleCount) {
+            log.info("Skipping sample seeding. Found {} existing users (target {}).", existingCount, targetSampleCount);
+            return;
+        }
+
+        List<UserEntity> usersToPersist = new ArrayList<>();
+        List<VehicleEntity> vehiclesToPersist = new ArrayList<>();
+        int adminSeeded = 0;
+        int driverSeeded = 0;
+        int riderSeeded = 0;
+
+        for (int i = 1; i <= 30; i++) {
+            String email = "admin" + i + "@viago.com";
+            if (userRepository.existsByEmailIgnoreCase(email)) {
+                continue;
+            }
+            usersToPersist.add(UserEntity.builder()
+                    .username("admin" + i)
+                    .email(email)
+                    .password(passwordEncoder.encode("AdminPass" + i + "!"))
+                    .role(Role.ADMIN)
+                    .build());
+            adminSeeded++;
+        }
+
+        for (int i = 1; i <= 30; i++) {
+            String email = "driver" + i + "@viago.com";
+            if (userRepository.existsByEmailIgnoreCase(email)) {
+                continue;
+            }
+            UserEntity driver = UserEntity.builder()
+                    .username("driver" + i)
+                    .email(email)
+                    .password(passwordEncoder.encode("DriverPass" + i + "!"))
+                    .role(Role.DRIVER)
+                    .build();
+            usersToPersist.add(driver);
+            driverSeeded++;
+
+            vehiclesToPersist.add(VehicleEntity.builder()
+                    .vehicleType(i % 2 == 0 ? "Car" : "Van")
+                    .model("Model-" + i)
+                    .seatCount(List.of(1, 3, 5, 8).get(i % 4))
+                    .registrationNumber(String.format("DRV-%04d", i))
+                    .driver(driver)
+                    .build());
+        }
+
+        for (int i = 1; i <= 30; i++) {
+            String email = "rider" + i + "@viago.com";
+            if (userRepository.existsByEmailIgnoreCase(email)) {
+                continue;
+            }
+            usersToPersist.add(UserEntity.builder()
+                    .username("rider" + i)
+                    .email(email)
+                    .password(passwordEncoder.encode("RiderPass" + i + "!"))
+                    .role(Role.RIDER)
+                    .build());
+            riderSeeded++;
+        }
+
+        if (usersToPersist.isEmpty()) {
+            log.info("Sample users already exist — nothing to seed.");
+            return;
+        }
+
+        userRepository.saveAll(usersToPersist);
+        if (!vehiclesToPersist.isEmpty()) {
+            vehicleRepository.saveAll(vehiclesToPersist);
+        }
+        log.info("Seeded sample data -> admins: {}, drivers: {}, riders: {}", adminSeeded, driverSeeded, riderSeeded);
+    }
+
+    private void deleteDriverVehicleIfExists(UserEntity userEntity) {
+        if (userEntity == null || userEntity.getRole() != Role.DRIVER) {
+            return;
+        }
+
+        Long driverId = userEntity.getUserId();
+        if (driverId == null) {
+            return;
+        }
+
+        vehicleRepository.findByDriverUserId(driverId)
+                .ifPresent(vehicle -> {
+                    vehicleRepository.delete(vehicle);
+                    log.info("Removed vehicle {} for driverId {}", vehicle.getRegistrationNumber(), driverId);
+                });
     }
 
 }
