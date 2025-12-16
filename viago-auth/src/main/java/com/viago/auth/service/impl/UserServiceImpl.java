@@ -533,6 +533,7 @@ public class UserServiceImpl implements UserService {
                     );
         }
     }
+
     //Done
     @Override
     public ResponseEntity<UserResponse> updateUser(UserDTO userDTO) {
