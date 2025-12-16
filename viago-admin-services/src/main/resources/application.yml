@@ -3,15 +3,19 @@ server:
 
 spring:
   application:
-    name: viago-admin-services
+    name: viago-admin-service
 
-auth-service:
-  base-url: http://localhost:8080
-  admin-token: ${AUTH_SERVICE_TOKEN:}
+#auth-service:
+#  base-url: http://localhost:8080
+#  admin-token: ${AUTH_SERVICE_TOKEN:}
+
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info
-
+eureka:
+  client:
+    service-url:
+      DefaultZone: http://localhost:8761/eureka/
