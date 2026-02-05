@@ -17,9 +17,14 @@ spring:
           writetimeout: 5000
         debug: true
 
-user-service:
-  url: ${USER_SERVICE_URL:http://localhost}
-  port: ${USER_SERVICE_PORT:8081}
+viago:
+  mail:
+    from-address: "orderhert@gmail.com"
+
+#
+#user-service:
+#  url: ${USER_SERVICE_URL:http://localhost}
+#  port: ${USER_SERVICE_PORT:8081}
 
 
 #  kafka:
