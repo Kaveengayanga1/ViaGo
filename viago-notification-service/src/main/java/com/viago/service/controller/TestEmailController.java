@@ -64,8 +64,8 @@ public class TestEmailController {
 
             emailService.sendHtmlEmail(email, subject, htmlBody);
 
-            log.info("Test email sent to: {}", email);
-            return ResponseEntity.ok("Test email sent successfully to: " + email);
+            log.info("Test email queued for: {}", email);
+            return ResponseEntity.ok("Test email queued for sending to: " + email);
         } catch (Exception e) {
             log.error("Failed to send test email to: {}. Error: {}", email, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
