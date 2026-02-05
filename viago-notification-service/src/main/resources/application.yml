@@ -1,0 +1,13 @@
+spring :
+  application:
+    name: viago-notification-service
+  profiles :
+    active : dev
+
+server :
+  port : ${SERVER_PORT:8083}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

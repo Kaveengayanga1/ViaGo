@@ -1,0 +1,51 @@
+spring:
+  mail:
+    host: smtp-relay.brevo.com
+    port: 587
+    username: ${MAIL_USER}
+    password: ${MAIL_PASS}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+        debug: true
+
+user-service:
+  url: ${USER_SERVICE_URL:http://localhost}
+  port: ${USER_SERVICE_PORT:8081}
+
+
+#  kafka:
+#    bootstrap-servers: localhost:9092
+#    consumer:
+#      group-id: user-signup-group
+#      auto-offset-reset: earliest
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#
+#  mail:
+#    host: smtp.ethereal.email
+#    port: 2525
+#    username: conner.homenick25@ethereal.email
+#    password: FvrgrmphQkk4XrFyGj
+#    properties:
+#      mail:
+#        smtp:
+#          auth:true
+#        starttls:
+#          enable:true
+#
+#  app:
+#    kafka:
+#      topic:
+#        user-signup: user-signup-topic

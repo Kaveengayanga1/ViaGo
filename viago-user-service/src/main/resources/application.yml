@@ -1,0 +1,20 @@
+port: 8082
+
+spring:
+  application:
+    name: viago-user-service
+
+#auth-service:
+#  base-url: http://localhost:8080
+#  admin-token: ${AUTH_SERVICE_TOKEN:}
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+eureka:
+  client:
+    service-url:
+      DefaultZone: http://localhost:8761/eureka/

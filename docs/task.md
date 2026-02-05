@@ -1,0 +1,22 @@
+- [x] Implement User Service Structure
+    - [x] Explore current viago-user-service structure
+    - [x] Reference viago-rider-engine structure for patterns
+    - [x] Create entity layer
+    - [x] Create DTO layer (request/response)
+    - [x] Create service interface
+    - [x] Create service implementation
+    - [x] Create controller layer
+    - [x] Update task documentation
+- [x] Analyze Viago Auth Service
+    - [x] Explore viago-auth directory structure
+    - [x] Review existing authentication implementation
+    - [x] Identify missing components
+    - [x] Document completion requirements
+- [ ] Implement Password Reset Feature [/]
+    - [ ] Create PasswordResetToken entity
+    - [ ] Create PasswordResetToken repository
+    - [ ] Create request/response DTOs
+    - [ ] Add email service interface
+    - [ ] Implement password reset service methods
+    - [ ] Add password reset endpoints to controller
+    - [ ] Test password reset flow
