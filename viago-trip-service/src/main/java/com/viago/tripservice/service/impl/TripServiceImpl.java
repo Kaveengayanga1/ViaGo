@@ -25,13 +25,11 @@ public class TripServiceImpl implements TripService {
         BigDecimal estimatedPrice = calculateDummyFare(request.getPickupLat(), request.getPickupLng(),
                 request.getDropLat(), request.getDropLng());
 
-        // 2. Trip Entity එක හදමු
+
         Trip trip = new Trip();
         trip.setRiderId(riderId);
-        trip.setPickupAddress(request.getPickupAddress());
         trip.setPickupLat(request.getPickupLat());
         trip.setPickupLng(request.getPickupLng());
-        trip.setDropAddress(request.getDropAddress());
         trip.setDropLat(request.getDropLat());
         trip.setDropLng(request.getDropLng());
 

@@ -29,14 +29,13 @@ public class Trip {
     private String driverId;
 
     // --- Pickup Location ---
-    private String pickupAddress;
+
     @Column(nullable = false)
     private Double pickupLat;
     @Column(nullable = false)
     private Double pickupLng;
 
     // --- Drop Location ---
-    private String dropAddress;
     @Column(nullable = false)
     private Double dropLat;
     @Column(nullable = false)

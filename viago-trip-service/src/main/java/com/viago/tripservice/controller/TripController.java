@@ -14,14 +14,20 @@ public class TripController {
 
     private final TripService tripService;
 
-    @PostMapping
-    public ResponseEntity<TripResponse> createTrip(@RequestBody TripRequest request,
-                                                   @RequestHeader("X-User-Id") String riderId) {
-        return ResponseEntity.ok(tripService.createTrip(request, riderId));
+
+    @PostMapping("/request")
+    public ResponseEntity<TripResponse> requestTrip(
+            @RequestBody TripRequest request,
+            @RequestHeader("loggedInUser") String riderId
+    ) {
+        TripResponse response = tripService.createTrip(request, riderId);
+        return ResponseEntity.ok(response);
     }
 
+
     @GetMapping("/{tripId}")
-    public ResponseEntity<TripResponse> getTripById(@PathVariable String tripId) {
-        return ResponseEntity.ok(tripService.getTripById(tripId));
+    public ResponseEntity<TripResponse> getTrip(@PathVariable String tripId) {
+        TripResponse response = tripService.getTripById(tripId);
+        return ResponseEntity.ok(response);
     }
 }
