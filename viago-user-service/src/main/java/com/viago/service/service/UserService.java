@@ -1,21 +1,27 @@
 package com.viago.service.service;
 
-import com.viago.service.dto.request.UserRegistrationDTO;
+import com.viago.service.dto.request.DriverOnboardingRequest;
+import com.viago.service.dto.request.SubmitRatingRequest;
 import com.viago.service.dto.request.UserUpdateDTO;
-import com.viago.service.dto.response.UserResponseDTO;
+import com.viago.service.dto.response.*;
+
+import java.util.List;
 
 public interface UserService {
-    UserResponseDTO createUser(UserRegistrationDTO request);
 
-    UserResponseDTO getUserById(Long userId);
+    UserResponse<UserProfileDTO> getUserProfile(Long userId);
 
-    UserResponseDTO getUserByEmail(String email);
+    UserResponse<UserProfileDTO> getUserProfileByEmail(String email);
 
-    UserResponseDTO updateUser(Long userId, UserUpdateDTO request);
+    UserResponse<UserProfileDTO> updateUserProfile(Long userId, UserUpdateDTO dto);
 
-    void deactivateUser(Long userId);
+    UserResponse<UserProfileDTO> onboardDriver(Long userId, DriverOnboardingRequest request);
 
-    void activateUser(Long userId);
+    UserResponse<UserProfileDTO> approveDriver(Long userId);
 
-    void deleteUser(Long userId);
+    UserResponse<ReviewDTO> submitRating(Long raterUserId, SubmitRatingRequest request);
+
+    UserResponse<List<ReviewDTO>> getUserReviews(Long userId);
+
+    UserResponse<VehicleDTO> getDriverVehicle(Long userId);
 }
