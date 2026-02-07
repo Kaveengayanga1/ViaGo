@@ -4,17 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5b9d749-7130-4b3b-ab86-6673ba9cbedc" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/viago-admin-services/src/main/java/com/viago/adminservices/client/UserInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/viago-admin-services/src/main/java/com/viago/adminservices/client/UserInterface.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/viago-matching-services/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/viago-matching-services/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/target/classes/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/cointroller/MatchingController.class" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/cointroller/MatchingController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/controller/MatchingController.class" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/controller/MatchingController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/dto/MatchingRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/dto/MatchingRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/service/MatchingService.class" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/service/MatchingService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/service/impl/MatchingServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/service/impl/MatchingServiceImpl.class" afterDir="false" />
-    </list>
+    <list default="true" id="f5b9d749-7130-4b3b-ab86-6673ba9cbedc" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -173,7 +163,7 @@
       <option name="presentableId" value="Default" />
       <updated>1770381196809</updated>
       <workItem from="1770381198109" duration="2025000" />
-      <workItem from="1770487727942" duration="10384000" />
+      <workItem from="1770487727942" duration="10601000" />
     </task>
     <servers />
   </component>
