@@ -5,6 +5,8 @@ import com.viago.tripservice.enums.RideStatus;
 import com.viago.tripservice.model.Ride;
 import com.viago.tripservice.repository.RideRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,9 +16,14 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class RideManagementService {
+    private static final Logger log = LoggerFactory.getLogger(RideManagementService.class);
     private final RideRepository rideRepository;
 
     public Ride createRide(RideRequest request) {
+        log.info("💾 Creating ride for rider: {}, pickup: {}, drop: {}, price: {}", 
+                 request.getRiderId(), request.getPickupAddress(), 
+                 request.getDropAddress(), request.getPrice());
+        
         Ride ride = new Ride();
         ride.setRiderId(request.getRiderId());
         ride.setPickupLat(request.getPickupLat());
@@ -25,11 +32,17 @@ public class RideManagementService {
         ride.setDropAddress(request.getDropAddress());
         ride.setPrice(request.getPrice());
         ride.setStatus(RideStatus.SEARCHING);
-        return rideRepository.save(ride);
+        Ride savedRide = rideRepository.save(ride);
+        
+        log.info("✅ Ride created and saved: rideId={}, status={}", 
+                 savedRide.getRideId(), savedRide.getStatus());
+        return savedRide;
     }
 
     @Transactional
     public boolean assignDriver(Long rideId, Long driverId) {
+        log.info("🔄 Attempting to assign driver {} to ride {}", driverId, rideId);
+        
         Optional<Ride> rideOpt = rideRepository.findById(rideId);
         if (rideOpt.isPresent()) {
             Ride ride = rideOpt.get();
@@ -37,8 +50,14 @@ public class RideManagementService {
                 ride.setStatus(RideStatus.ACCEPTED);
                 ride.setDriverId(driverId);
                 rideRepository.save(ride);
+                log.info("✅ Driver assignment successful: rideId={}, driverId={}", rideId, driverId);
                 return true; // Success
+            } else {
+                log.warn("⚠️ Ride {} already has status: {}, cannot assign driver {}", 
+                         rideId, ride.getStatus(), driverId);
             }
+        } else {
+            log.error("❌ Ride {} not found in database", rideId);
         }
         return false;
     }
