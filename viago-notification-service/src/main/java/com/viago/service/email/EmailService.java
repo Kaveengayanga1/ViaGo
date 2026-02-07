@@ -10,13 +10,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -31,11 +29,9 @@ public class EmailService {
     @Value("${viago.mail.from-address}")
     private String senderEmail;
 
-    @Async("emailTaskExecutor")
-    public CompletableFuture<Void> sendSimpleEmail(String to, String subject, String body) {
+    public void sendSimpleEmail(String to, String subject, String body) {
         try {
-            log.info("[ASYNC] Sending simple email from: {} to: {} [Thread: {}]",
-                    senderEmail, to, Thread.currentThread().getName());
+            log.info("Sending simple email from: {} to: {}", senderEmail, to);
 
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -46,19 +42,16 @@ public class EmailService {
             helper.setText(body, true);
 
             mailSender.send(mimeMessage);
-            log.info("[ASYNC] Simple email sent successfully to: {}", to);
-            return CompletableFuture.completedFuture(null);
+            log.info("Simple email sent successfully to: {}", to);
         } catch (MessagingException e) {
-            log.error("[ASYNC] Error sending simple email to: {}", to, e);
-            return CompletableFuture.failedFuture(e);
+            log.error("Error sending simple email to: {}", to, e);
+            throw new RuntimeException("Failed to send email", e);
         }
     }
 
-    @Async("emailTaskExecutor")
-    public CompletableFuture<Void> sendHtmlEmail(String to, String subject, String htmlBody) {
+    public void sendHtmlEmail(String to, String subject, String htmlBody) {
         try {
-            log.info("[ASYNC] Sending HTML email from: {} to: {} [Thread: {}]",
-                    senderEmail, to, Thread.currentThread().getName());
+            log.info("Sending HTML email from: {} to: {}", senderEmail, to);
 
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -69,11 +62,10 @@ public class EmailService {
             helper.setText(htmlBody, true);
 
             mailSender.send(mimeMessage);
-            log.info("[ASYNC] HTML email sent successfully to: {}", to);
-            return CompletableFuture.completedFuture(null);
+            log.info("HTML email sent successfully to: {}", to);
         } catch (MessagingException e) {
-            log.error("[ASYNC] Failed to send HTML email to: {}", to, e);
-            return CompletableFuture.failedFuture(e);
+            log.error("Failed to send HTML email to: {}", to, e);
+            throw new RuntimeException("Failed to send email", e);
         }
     }
 
@@ -84,8 +76,7 @@ public class EmailService {
      * @param request NotificationRequest containing recipient, type, and dynamic
      *                data
      */
-    @Async("emailTaskExecutor")
-    public CompletableFuture<Void> sendNotification(NotificationRequest request) {
+    public void sendNotification(NotificationRequest request) {
         String templateName;
         String subject;
 
@@ -108,8 +99,7 @@ public class EmailService {
         }
 
         try {
-            log.info("[ASYNC] Sending {} notification to: {} [Thread: {}]",
-                    request.getType(), request.getTo(), Thread.currentThread().getName());
+            log.info("Sending {} notification to: {}", request.getType(), request.getTo());
 
             // Create Thymeleaf context with data
             Context context = new Context();
@@ -123,14 +113,13 @@ public class EmailService {
             String htmlContent = templateEngine.process(templateName, context);
 
             // Send the email
-            sendHtmlEmail(request.getTo(), subject, htmlContent).join();
+            sendHtmlEmail(request.getTo(), subject, htmlContent);
 
-            log.info("[ASYNC] {} notification sent successfully to: {}", request.getType(), request.getTo());
-            return CompletableFuture.completedFuture(null);
+            log.info("{} notification sent successfully to: {}", request.getType(), request.getTo());
         } catch (Exception e) {
-            log.error("[ASYNC] Failed to send {} notification to: {}. Error: {}",
+            log.error("Failed to send {} notification to: {}. Error: {}",
                     request.getType(), request.getTo(), e.getMessage(), e);
-            return CompletableFuture.failedFuture(e);
+            throw new RuntimeException("Failed to send notification", e);
         }
     }
 }
