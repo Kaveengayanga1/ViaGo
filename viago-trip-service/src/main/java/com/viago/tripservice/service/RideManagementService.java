@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -19,11 +19,14 @@ public class RideManagementService {
     private static final Logger log = LoggerFactory.getLogger(RideManagementService.class);
     private final RideRepository rideRepository;
 
+    /**
+     * අලුත් Ride එකක් සාදා Database එකට Save කිරීම.
+     * saveAndFlush මගින් දත්ත වහාම DB එකට ලියවෙන බව සහතික කරයි.
+     */
+    @Transactional
     public Ride createRide(RideRequest request) {
-        log.info("💾 Creating ride for rider: {}, pickup: {}, drop: {}, price: {}", 
-                 request.getRiderId(), request.getPickupAddress(), 
-                 request.getDropAddress(), request.getPrice());
-        
+        log.info("💾 Creating ride for rider: {}", request.getRiderId());
+
         Ride ride = new Ride();
         ride.setRiderId(request.getRiderId());
         ride.setPickupLat(request.getPickupLat());
@@ -32,40 +35,57 @@ public class RideManagementService {
         ride.setDropAddress(request.getDropAddress());
         ride.setPrice(request.getPrice());
         ride.setStatus(RideStatus.SEARCHING);
-        Ride savedRide = rideRepository.save(ride);
-        
-        log.info("✅ Ride created and saved: rideId={}, status={}", 
-                 savedRide.getRideId(), savedRide.getStatus());
+
+        // ⚠️ වැදගත්: saveAndFlush භාවිතා කරන්න. එවිට Transaction commit වීමට පෙරම SQL එක DB එකට යයි.
+        Ride savedRide = rideRepository.saveAndFlush(ride);
+
+        log.info("✅ Ride created successfully: rideId={}, status={}", savedRide.getRideId(), savedRide.getStatus());
         return savedRide;
     }
 
-    @Transactional
+    /**
+     * Driver කෙනෙක් Ride එක Accept කිරීම.
+     * Transaction Isolation මට්ටම READ_COMMITTED ලෙස තැබීමෙන්,
+     * createRide එකෙන් save වූ දත්ත කියවීමට හැකි බව සහතික කරයි.
+     */
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public boolean assignDriver(Long rideId, Long driverId) {
-        log.info("🔄 Attempting to assign driver {} to ride {}", driverId, rideId);
-        
+        log.info("🔄 Processing Driver Assignment: Driver {} -> Ride {}", driverId, rideId);
+
+        // 1. Ride එක Database එකෙන් සොයන්න
         Optional<Ride> rideOpt = rideRepository.findById(rideId);
+
         if (rideOpt.isPresent()) {
             Ride ride = rideOpt.get();
+
+            // 2. Status Check: තවමත් SEARCHING තත්ත්වයේ තිබේදැයි බලන්න
             if (ride.getStatus() == RideStatus.SEARCHING) {
                 ride.setStatus(RideStatus.ACCEPTED);
                 ride.setDriverId(driverId);
-                rideRepository.save(ride);
-                log.info("✅ Driver assignment successful: rideId={}, driverId={}", rideId, driverId);
-                return true; // Success
+
+                // Update එක වහාම සිදු කරන්න
+                rideRepository.saveAndFlush(ride);
+
+                log.info("✅ SUCCESS: Driver {} assigned to Ride {}", driverId, rideId);
+                return true;
             } else {
-                log.warn("⚠️ Ride {} already has status: {}, cannot assign driver {}", 
-                         rideId, ride.getStatus(), driverId);
+                log.warn("⚠️ FAILED: Ride {} is already taken. Current Status: {}", rideId, ride.getStatus());
+                return false;
             }
         } else {
-            log.error("❌ Ride {} not found in database", rideId);
+            // Ride එක සොයාගත නොහැකි නම් Database එකේ මුළු Rides ගණන බලන්න (Debug සඳහා)
+            long count = rideRepository.count();
+            log.error("❌ ERROR: Ride {} NOT FOUND! Total rides in DB: {}", rideId, count);
+            return false;
         }
-        return false;
     }
 
+    @Transactional
     public void updateStatus(Long rideId, RideStatus status) {
         rideRepository.findById(rideId).ifPresent(ride -> {
+            log.info("📝 Updating Ride {} status to {}", rideId, status);
             ride.setStatus(status);
-            rideRepository.save(ride);
+            rideRepository.saveAndFlush(ride);
         });
     }
 
@@ -74,8 +94,8 @@ public class RideManagementService {
     }
 
     public Long getRiderId(Long rideId) {
-        Ride ride = getRide(rideId);
-        return ride != null ? ride.getRiderId() : null;
+        return rideRepository.findById(rideId)
+                .map(Ride::getRiderId)
+                .orElse(null);
     }
-
 }
