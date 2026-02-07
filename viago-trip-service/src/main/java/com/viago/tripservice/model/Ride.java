@@ -23,41 +23,20 @@ public class Ride {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String riderId;
+    private Long rideId;
 
-    private String driverId;
+    private Long riderId;
+    private Long driverId;
 
-    // --- Pickup Location ---
-
-    @Column(nullable = false)
-    private Double pickupLat;
-    @Column(nullable = false)
-    private Double pickupLng;
-
-    // --- Drop Location ---
-    @Column(nullable = false)
-    private Double dropLat;
-    @Column(nullable = false)
-    private Double dropLng;
-
-    // --- Trip Info ---
-    @Enumerated(EnumType.STRING)
-    private RideStatus status;
+    // Location Data
+    private double pickupLat;
+    private double pickupLng;
+    private String pickupAddress;
+    private String dropAddress;
 
     @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
+    private RideStatus status; // SEARCHING, ACCEPTED, ARRIVED, IN_PROGRESS, COMPLETED
 
-    private BigDecimal distanceKm;
-    private BigDecimal estimatedFare;
-
-    // --- Timestamps ---
-    @CreationTimestamp
-    private LocalDateTime requestedAt;
-
-    private LocalDateTime startedAt;
-    private LocalDateTime endedAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private double price;
+    private LocalDateTime createdTime;
 }
