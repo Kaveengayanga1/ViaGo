@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: viago-auth-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_DATABASE: viagoAuth
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pmysql" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - viago-network
+
+  # RabbitMQ (from your RabbitMQConfig.java)
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: viago-auth-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672" # AMQP port
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - viago-network
+
+  # ViaGO Auth Service
+  viago-auth:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: viago-auth-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Database configuration
+      DB_URL: jdbc:mysql://mysql:3306/
+      DB_NAME: viagoAuth
+      DB_USERNAME: root
+      DB_PASSWORD: mysql
+
+      # JWT configuration
+      JWT_SECRET: 9070a07001f03abb91a1c1171d1454a53e3ebf8ef9062a7b7f9df21dd70f45a0
+
+      # User service configuration
+      USER_SERVICE_URL: http://localhost
+      USER_SERVICE_PORT: 8080
+
+      # Google OAuth
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+
+      # RabbitMQ configuration (if needed)
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - viago-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  viago-network:
+    driver: bridge
