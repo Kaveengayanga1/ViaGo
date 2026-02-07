@@ -13,8 +13,16 @@ public class UserIntegrationService {
     }
 
     public UserDetailsDto getDriverDetails(Long driverId) {
-        String url = "http://localhost:8081/api/v1/users/" + driverId + "/profile";
-        return restTemplate.getForObject(url, UserDetailsDto.class);
-    }
+        try {
+            // Real Call: return restTemplate.getForObject(AUTH_SERVICE_URL + "/" + driverId, UserDetailsDto.class);
 
+            // --- DUMMY DATA FOR TESTING (Auth Service නැති විට) ---
+            return new UserDetailsDto(
+                    driverId, "Sampath Perera", "077-1234567", "Toyota Prius", "CAB-1234"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new UserDetailsDto(driverId, "Unknown Driver", "", "", "");
+        }
+    }
 }
