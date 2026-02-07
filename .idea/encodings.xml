@@ -5,7 +5,13 @@
     <file url="file://$PROJECT_DIR$/trip-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/viago-admin-services/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/viago-auth/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/viago-matching-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/viago-matching-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/viago-matching-services/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/viago-matching-services/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/viago-rider-engine/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/viago-service-discovery/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/viago-trip-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/viago-trip-service/src/main/resources" charset="UTF-8" />
   </component>
 </project>
