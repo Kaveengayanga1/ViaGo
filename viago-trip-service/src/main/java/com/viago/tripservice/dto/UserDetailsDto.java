@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDetailsDto {
-    private Long userId;
-    private String fullName;
-    private String phoneNumber;
-    private String vehicleModel;
-    private String vehicleNumber;
-
+    private Long id;
+    private String name;       // fullName වෙනුවට name
+    private String phone;      // phoneNumber වෙනුවට phone
+    private String email;
+    private String vehicleNo;  // වාහන අංකය
+    private String vehicleModel; // වාහන වර්ගය (Prius, Alto etc.)
 }
