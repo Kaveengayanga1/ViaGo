@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "viago-auth-service", configuration = FeignClientConfig.class)
+@FeignClient(name = "viago-auth-service",url = "http://viago-auth-service:8080", configuration = FeignClientConfig.class)
 public interface UserInterface {
 
     // 1. DELETE User
