@@ -33,6 +33,11 @@ public class AdminUserController {
 
     private final AdminUserService adminUserService;
 
+    @GetMapping("/test")
+    public String test() {
+        return "test success: viago-admin-services";
+    }
+
     @GetMapping
     public ResponseEntity<UserResponse> listUsers(@RequestParam(required = false) String role,
             @RequestParam(required = false) Integer page,
