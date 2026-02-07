@@ -54,4 +54,9 @@ public class RideManagementService {
         return rideRepository.findById(rideId).orElse(null);
     }
 
+    public Long getRiderId(Long rideId) {
+        Ride ride = getRide(rideId);
+        return ride != null ? ride.getRiderId() : null;
+    }
+
 }
