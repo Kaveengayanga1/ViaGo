@@ -1,10 +1,10 @@
 package com.viago.tripservice.enums;
 
-public enum TripStatus {
+public enum RideStatus {
     REQUESTED,
-    MATCHING,
     ACCEPTED,
-    STARTED,
+    ARRIVED,
+    IN_PROGRESS,
     COMPLETED,
     CANCELLED
 }

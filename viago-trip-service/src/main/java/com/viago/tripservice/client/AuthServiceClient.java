@@ -1,4 +1,4 @@
 package com.viago.tripservice.client;
 
-public class MatchingServiceClient {
+public class AuthServiceClient {
 }
