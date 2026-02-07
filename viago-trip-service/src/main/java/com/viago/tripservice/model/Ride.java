@@ -1,7 +1,7 @@
 package com.viago.tripservice.model;
 
 import com.viago.tripservice.enums.PaymentMethod;
-import com.viago.tripservice.enums.TripStatus;
+import com.viago.tripservice.enums.RideStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -43,7 +43,7 @@ public class Trip {
 
     // --- Trip Info ---
     @Enumerated(EnumType.STRING)
-    private TripStatus status;
+    private RideStatus status;
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
