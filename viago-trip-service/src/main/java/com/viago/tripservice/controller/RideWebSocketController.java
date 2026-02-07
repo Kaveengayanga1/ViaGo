@@ -24,6 +24,16 @@ public class RideWebSocketController {
     private final UserIntegrationService userIntegrationService;
     private final SimpMessagingTemplate messagingTemplate;
 
+    public RideWebSocketController(RideManagementService rideService, 
+                                   DriverMatchingService matchingService,
+                                   UserIntegrationService userIntegrationService, 
+                                   SimpMessagingTemplate messagingTemplate) {
+        this.rideService = rideService;
+        this.matchingService = matchingService;
+        this.userIntegrationService = userIntegrationService;
+        this.messagingTemplate = messagingTemplate;
+    }
+
     @MessageMapping("/driver-update")
     public void updateDriverLocation(@Payload LocationUpdateDto loc) {
         matchingService.updateLocation(loc.getDriverId(), loc.getLat(), loc.getLng());
@@ -46,7 +56,15 @@ public class RideWebSocketController {
         List<Long> nearbyDrivers = matchingService.findNearbyDrivers(request.getPickupLat(), request.getPickupLng());
 
         // D. Drivers ලාට Offer එක යවනවා (Trip ID එකත් එක්කම!)
-        RideOffer offer = new RideOffer(tripId, request.getPickupAddress(), request.getPrice());
+        RideOffer offer = new RideOffer(
+                tripId, 
+                request.getRiderName(), 
+                request.getPickupAddress(), 
+                request.getDropAddress(), 
+                request.getPrice(), 
+                request.getPickupLat(), 
+                request.getPickupLng()
+        );
         for (Long driverId : nearbyDrivers) {
             messagingTemplate.convertAndSendToUser(
                     driverId.toString(),
