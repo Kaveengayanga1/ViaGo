@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5b9d749-7130-4b3b-ab86-6673ba9cbedc" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/viago-user-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/viago-user-service/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/viago-user-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/viago-user-service/src/main/resources/application.yml" afterDir="false" />
-    </list>
+    <list default="true" id="f5b9d749-7130-4b3b-ab86-6673ba9cbedc" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -42,6 +38,9 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
     "run.configurations.included.in.services": "true",
     "vue.rearranger.settings.migration": "true"
   }
@@ -96,7 +95,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1770381196809</updated>
-      <workItem from="1770381198109" duration="1344000" />
+      <workItem from="1770381198109" duration="2025000" />
     </task>
     <servers />
   </component>
