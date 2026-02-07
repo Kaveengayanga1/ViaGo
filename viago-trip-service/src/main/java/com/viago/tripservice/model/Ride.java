@@ -21,8 +21,7 @@ import java.time.LocalDateTime;
 public class Ride {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    @Column(name = "ride_id")
     private Long rideId;
 
     private Long riderId;

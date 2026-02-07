@@ -1,6 +1,8 @@
 package com.viago.tripservice.service;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,25 +12,39 @@ import java.util.stream.Collectors;
 
 @Service
 public class DriverMatchingService {
+    private static final Logger log = LoggerFactory.getLogger(DriverMatchingService.class);
     private final Map<Long, double[]> driverLocations = new ConcurrentHashMap<>();
 
     public void updateLocation(Long driverId, double lat, double lng) {
         driverLocations.put(driverId, new double[]{lat, lng});
+        log.info("📍 Driver location stored: driverId={}, totalOnlineDrivers={}", 
+                 driverId, driverLocations.size());
     }
     public void removeDriver(Long driverId) {
         driverLocations.remove(driverId);
+        log.info("👋 Driver went offline: driverId={}, totalOnlineDrivers={}", 
+                 driverId, driverLocations.size());
     }
 
 
 
     public List<Long> findNearbyDrivers(double pickupLat, double pickupLng) {
-        return driverLocations.entrySet().stream()
+        log.info("🔍 Searching for drivers near: lat={}, lng={}, totalDriversOnline={}", 
+                 pickupLat, pickupLng, driverLocations.size());
+        
+        List<Long> nearbyDrivers = driverLocations.entrySet().stream()
                 .filter(entry -> {
                     double[] loc = entry.getValue();
-                    return calculateDistance(pickupLat, pickupLng, loc[0], loc[1]) <= 5.0;
+                    double distance = calculateDistance(pickupLat, pickupLng, loc[0], loc[1]);
+                    log.debug("📏 Evaluating driver {}: distance={} km", entry.getKey(), 
+                             String.format("%.2f", distance));
+                    return distance <= 5.0;
                 })
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
+        
+        log.info("✅ Nearby drivers found: {} drivers within 5km radius", nearbyDrivers.size());
+        return nearbyDrivers;
     }
 
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
