@@ -1,4 +1,8 @@
 creds.txt
+<<<<<<< Updated upstream
 
 # Implementation plans and walkthroughs
 .workflows/
+=======
+*.workflows
+>>>>>>> Stashed changes
