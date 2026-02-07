@@ -6,6 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="f5b9d749-7130-4b3b-ab86-6673ba9cbedc" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-admin-services/src/main/java/com/viago/adminservices/client/UserInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/viago-admin-services/src/main/java/com/viago/adminservices/client/UserInterface.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-matching-services/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-matching-services/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/target/classes/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/cointroller/MatchingController.class" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/cointroller/MatchingController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/controller/MatchingController.class" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/controller/MatchingController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/dto/MatchingRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/dto/MatchingRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/service/MatchingService.class" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/service/MatchingService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/service/impl/MatchingServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/viago-matching-services/target/classes/com/viago/matchingservice/service/impl/MatchingServiceImpl.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,32 +35,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;Spring Boot.Main (1).executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.Main.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;deploy&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/becs/year_03/semester_06/becs_32263_full_stack/project/ViaGO/backend&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.Main (1).executor": "Run",
+    "Spring Boot.Main (2).executor": "Run",
+    "Spring Boot.Main.executor": "Run",
+    "Spring Boot.TripMatchingServicesApplication.executor": "Run",
+    "git-widget-placeholder": "deploy",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/becs/year_03/semester_06/becs_32263_full_stack/project/ViaGO/backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "run.configurations.included.in.services": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunDashboard">
     <option name="configurationTypes">
       <set>
@@ -62,7 +72,20 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.Main">
+  <component name="RunManager" selected="Spring Boot.Main (1)">
+    <configuration name="Main (1)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="viago-admin-services" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.viago.adminservices.Main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.viago.adminservices.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Main (2)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="viago-service-discovery" />
@@ -74,6 +97,26 @@
     <configuration name="Main" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="viago-admin-services" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.viago.adminservices.Main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Main" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <option name="envFilePaths">
+        <option value="$PROJECT_DIR$/viago-auth/.env" />
+      </option>
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="ViaGO-Auth" />
+      <selectedOptions>
+        <option name="environmentVariables" />
+      </selectedOptions>
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.viago.auth.Main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.viago.auth.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -92,6 +135,26 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="TripMatchingServicesApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="viago-matching-services" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.viago.matchingservice.TripMatchingServicesApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.viago.matchingservice.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.Main (1)" />
+        <item itemvalue="Spring Boot.Main" />
+        <item itemvalue="Spring Boot.TripMatchingServicesApplication" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -110,7 +173,7 @@
       <option name="presentableId" value="Default" />
       <updated>1770381196809</updated>
       <workItem from="1770381198109" duration="2025000" />
-      <workItem from="1770487727942" duration="6651000" />
+      <workItem from="1770487727942" duration="10384000" />
     </task>
     <servers />
   </component>
