@@ -27,10 +27,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.*;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.viago.auth.config.RabbitMQConfig;
-import com.viago.auth.dto.request.EmailRequest;
+// Commented out RabbitMQ integration - using Feign client instead
+// import org.springframework.amqp.rabbit.core.RabbitTemplate;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import com.viago.auth.config.RabbitMQConfig;
+// import com.viago.auth.dto.request.EmailRequest;
+import com.viago.auth.client.NotificationServiceClient;
+import com.viago.auth.dto.request.NotificationRequest;
 
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -52,9 +55,11 @@ public class UserServiceImpl implements UserService {
         AuthenticationManager authenticationManager;
         JwtServiceImpl jwtService;
         RestTemplate restTemplate;
+        NotificationServiceClient notificationServiceClient;
 
-        @Autowired(required = false) // Optional to prevent startup failure if RabbitMQ unavailable
-        private RabbitTemplate rabbitTemplate;
+        // Commented out RabbitMQ integration - using Feign client instead
+        // @Autowired(required = false) // Optional to prevent startup failure if RabbitMQ unavailable
+        // private RabbitTemplate rabbitTemplate;
 
         @Value("${user-service.url}")
         private String userServiceURL;
@@ -67,7 +72,8 @@ public class UserServiceImpl implements UserService {
                         AuthenticationManager authenticationManager,
                         JwtServiceImpl jwtService,
                         RestTemplate restTemplate,
-                        ObjectMapper objectMapper) {
+                        ObjectMapper objectMapper,
+                        NotificationServiceClient notificationServiceClient) {
                 this.userRepository = userRepository;
                 this.vehicleRepository = vehicleRepository;
                 this.passwordEncoder = passwordEncoder;
@@ -75,6 +81,7 @@ public class UserServiceImpl implements UserService {
                 this.authenticationManager = authenticationManager;
                 this.jwtService = jwtService;
                 this.restTemplate = restTemplate;
+                this.notificationServiceClient = notificationServiceClient;
 
                 // log.info("User service url set to {}{}", userServiceURL, userServicePort);
         }
@@ -223,34 +230,34 @@ public class UserServiceImpl implements UserService {
                                         savedUser.getUserId(), userDTO.getRole());
 
                         // FAILSAFE: Send email notification - don't fail signup if this fails
+                        // Using Feign client to communicate with notification service via Eureka
                         try {
-                                if (rabbitTemplate != null) {
-                                        EmailRequest emailRequest = new EmailRequest(
+                                if (notificationServiceClient != null) {
+                                        // Template expects "name" field, use username as display name
+                                        String displayName = savedUser.getUsername() != null 
+                                                ? savedUser.getUsername() 
+                                                : "User";
+                                        
+                                        NotificationRequest notificationRequest = new NotificationRequest(
                                                         savedUser.getEmail(),
-                                                        "Welcome to ViaGO!",
-                                                        "signup_welcome",
+                                                        "WELCOME",
                                                         Map.of(
-                                                                        "username",
-                                                                        savedUser.getUsername() != null
-                                                                                        ? savedUser.getUsername()
-                                                                                        : "User",
-                                                                        "email", savedUser.getEmail(),
-                                                                        "role", savedUser.getRole().name()));
+                                                                        "name", displayName,  // Template expects "name" field
+                                                                        "username", displayName,
+                                                                        "email", savedUser.getEmail()
+                                                        ));
 
-                                        rabbitTemplate.convertAndSend(
-                                                        RabbitMQConfig.EXCHANGE,
-                                                        RabbitMQConfig.ROUTING_KEY,
-                                                        emailRequest);
-
-                                        log.info("Signup notification queued for email: {}", savedUser.getEmail());
+                                        notificationServiceClient.sendNotification(notificationRequest);
+                                        log.info("Welcome email notification sent via Feign client for email: {}", 
+                                                        savedUser.getEmail());
                                 } else {
-                                        log.warn("RabbitTemplate not available - signup notification skipped for: {}",
+                                        log.warn("NotificationServiceClient not available - welcome email skipped for: {}",
                                                         savedUser.getEmail());
                                 }
                         } catch (Exception e) {
                                 // Log but don't fail signup
-                                log.error("Failed to queue signup notification for {} - continuing with signup: {}",
-                                                savedUser.getEmail(), e.getMessage());
+                                log.error("Failed to send welcome email notification for {} - continuing with signup: {}",
+                                                savedUser.getEmail(), e.getMessage(), e);
                         }
 
                         // String url = userServiceURL + ":" + userServicePort + "/profile/create";

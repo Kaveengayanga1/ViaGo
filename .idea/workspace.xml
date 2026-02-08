@@ -4,7 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5b9d749-7130-4b3b-ab86-6673ba9cbedc" name="Changes" comment="" />
+    <list default="true" id="f5b9d749-7130-4b3b-ab86-6673ba9cbedc" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-auth/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/viago-auth/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/config/OAuth2SignupSuccessHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/config/OAuth2SignupSuccessHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/service/impl/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/service/impl/UserServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-notification-service/src/main/java/com/viago/service/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/viago-notification-service/src/main/java/com/viago/service/NotificationMain.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-notification-service/src/main/java/com/viago/service/controller/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/viago-notification-service/src/main/java/com/viago/service/controller/NotificationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-notification-service/src/main/java/com/viago/service/enums/NotificationType.java" beforeDir="false" afterPath="$PROJECT_DIR$/viago-notification-service/src/main/java/com/viago/service/enums/NotificationType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-notification-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/viago-notification-service/src/main/resources/application.yml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -13,13 +25,13 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
-  <component name="KubernetesApiProvider"><![CDATA[{
-  "isMigrated": true
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 8
-}]]></component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
   <component name="ProjectId" id="39IQe3rVYxWu8wjfMk1TW2w8cCD" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -29,6 +41,7 @@
   "keyToString": {
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Spring Boot.Main.executor": "Run",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
@@ -54,11 +67,11 @@
       </set>
     </option>
   </component>
-  <component name="RunManager">
-    <configuration name="Main (1)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+  <component name="RunManager" selected="Spring Boot.Main">
+    <configuration name="AuthMain" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="ViaGO-Auth" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="com.viago.auth.Main" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.viago.auth.AuthMain" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -96,6 +109,7 @@
       <option name="presentableId" value="Default" />
       <updated>1770381196809</updated>
       <workItem from="1770381198109" duration="2025000" />
+      <workItem from="1770533676083" duration="188000" />
     </task>
     <servers />
   </component>

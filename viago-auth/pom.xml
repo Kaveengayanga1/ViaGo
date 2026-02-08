@@ -134,10 +134,19 @@
             <version>4.3.0</version>
         </dependency>
 
-        <!-- RabbitMQ for asynchronous messaging -->
+        <!-- RabbitMQ for asynchronous messaging - Commented out, using Feign client instead -->
+        <!--
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        -->
+
+        <!-- Spring Cloud OpenFeign for service-to-service communication -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>4.2.3</version>
         </dependency>
 
         <!-- Google Cloud SQL Socket Factory for Cloud Run -->
@@ -148,6 +157,19 @@
 <!--        </dependency>-->
 
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Cloud Dependencies -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>2025.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
