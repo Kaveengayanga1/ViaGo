@@ -137,4 +137,47 @@ public class RideWebSocketController {
             rideToRiderCache.remove(action.getRideId());
         }
     }
+
+    @MessageMapping("/trip-started")
+    public void startTrip(@Payload DriverAction action) {
+        log.info("🚗 Driver {} started trip: {}", action.getDriverId(), action.getRideId());
+        
+        // Get Rider ID for this ride
+        Long riderId = rideService.getRiderId(action.getRideId());
+        
+        if (riderId != null) {
+            log.info("📤 Sending TRIP_STARTED status to rider: {}", riderId);
+            
+            // Notify Rider: TRIP_STARTED
+            TripUpdate update = new TripUpdate("TRIP_STARTED", action.getRideId(), null);
+            messagingTemplate.convertAndSend("/topic/ride-status/" + riderId, update);
+            
+            log.info("✅ Trip started notification sent successfully");
+        } else {
+            log.error("❌ Could not find rider ID for ride: {}", action.getRideId());
+        }
+    }
+
+    @MessageMapping("/trip-ended")
+    public void endTrip(@Payload DriverAction action) {
+        log.info("🏁 Driver {} ended trip: {}", action.getDriverId(), action.getRideId());
+        
+        // Get Rider ID for this ride
+        Long riderId = rideService.getRiderId(action.getRideId());
+        
+        if (riderId != null) {
+            log.info("📤 Sending TRIP_ENDED status to rider: {}", riderId);
+            
+            // Notify Rider: TRIP_ENDED
+            TripUpdate update = new TripUpdate("TRIP_ENDED", action.getRideId(), null);
+            messagingTemplate.convertAndSend("/topic/ride-status/" + riderId, update);
+            
+            log.info("✅ Trip ended notification sent successfully");
+            
+            // Optional: Update ride status in database to COMPLETED
+            rideService.completeRide(action.getRideId());
+        } else {
+            log.error("❌ Could not find rider ID for ride: {}", action.getRideId());
+        }
+    }
 }
