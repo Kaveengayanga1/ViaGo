@@ -4,11 +4,11 @@ server:
 spring:
   application:
     name: viago-user-service
-  
+
   # Set default active profile to dev
   profiles:
     active: dev
-    
+
   # RabbitMQ Configuration (Disabled for now)
   rabbitmq:
     host: localhost
@@ -37,7 +37,7 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka-server:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
     enabled: true
