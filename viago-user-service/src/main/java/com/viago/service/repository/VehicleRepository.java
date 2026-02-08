@@ -9,7 +9,7 @@ import java.util.Optional;
 @Repository
 public interface VehicleRepository extends JpaRepository<VehicleEntity, Long> {
 
-    Optional<VehicleEntity> findByUserId(Long userId);
+    Optional<VehicleEntity> findByUser_UserId(Long userId);
 
     Optional<VehicleEntity> findByPlateNumber(String plateNumber);
 }
