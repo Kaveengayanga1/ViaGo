@@ -35,8 +35,8 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/viago-mail-service:latest ./viago-notification-service
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/viago-mail-service:latest
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/viago-notification-service:latest ./viago-notification-service
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/viago-notification-service:latest
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@master
@@ -46,9 +46,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
 
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/viago-mail-service:latest
-            docker stop viago-mail-service || true
-            docker rm viago-mail-service || true
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/viago-notification-service:latest
+            docker stop viago-notification-service || true
+            docker rm viago-notification-service || true
 
 
             docker run -d \
@@ -56,4 +56,4 @@ jobs:
               --network viago-net \
               --env-file dev.env \
               -p 8083:8083 \
-              ${{ secrets.DOCKERHUB_USERNAME }}/viago-mail-service:latest
+              ${{ secrets.DOCKERHUB_USERNAME }}/viago-notification-service:latest
