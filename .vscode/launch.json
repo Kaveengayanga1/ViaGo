@@ -1,7 +1,13 @@
 {
     "version": "0.2.0",
     "configurations": [
-        
+        {
+            "type": "java",
+            "name": "AuthMain1",
+            "request": "launch",
+            "mainClass": "com.viago.auth.AuthMain1",
+            "projectName": "ViaGO-Auth"
+        },
         {
             "type": "java",
             "name": "Run Notification Service",
