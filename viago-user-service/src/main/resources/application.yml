@@ -1,25 +1,48 @@
-port: 8082
+server:
+  port: 8082
 
 spring:
   application:
     name: viago-user-service
+  
+  # Set default active profile to dev
+  profiles:
+    active: dev
+    
+  # RabbitMQ Configuration (Disabled for now)
   rabbitmq:
     host: localhost
     port: 5672
     username: guest
     password: guest
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
 
 #auth-service:
 #  base-url: http://localhost:8080
 #  admin-token: ${AUTH_SERVICE_TOKEN:}
 
-
+# Actuator endpoints for health checks
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Eureka Client Configuration
 eureka:
   client:
     service-url:
-      DefaultZone: http://localhost:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+    enabled: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
