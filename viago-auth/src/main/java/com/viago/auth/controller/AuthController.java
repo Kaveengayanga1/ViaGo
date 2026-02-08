@@ -35,7 +35,7 @@ public class AuthController {
     }
     @GetMapping
     public String hello(){
-        return "hello auth pipeline ";
+        return "hello auth pipeline with env";
     }
 
     @GetMapping("/google/login")
