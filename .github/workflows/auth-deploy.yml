@@ -2,7 +2,8 @@ name: Deploy Auth Service
 
 on:
   push:
-    branches: [deploy]
+    branches:
+      - "feature/deploy-final"
     paths:
       - "viago-auth/**"
 

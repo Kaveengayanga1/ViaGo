@@ -2,7 +2,8 @@ name: Deploy Trip Service
 
 on:
   push:
-    branches: [deploy]
+    branches:
+      - "feature/deploy-final"
     paths:
       - "viago-trip-service/**"
 

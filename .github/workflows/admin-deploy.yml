@@ -2,7 +2,8 @@ name: Deploy Admin Service
 
 on:
   push:
-    branches: [deploy]
+    branches:
+      - "feature/deploy-final"
     paths:
       - "viago-admin-services/**"
 
