@@ -1,42 +1,56 @@
 package com.viago.tripservice.model;
 
-import com.viago.tripservice.enums.PaymentMethod;
 import com.viago.tripservice.enums.RideStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "rides")
-@Data
-
+@Getter // ⚠️ @Data වෙනුවට මෙය භාවිතා කරන්න
+@Setter
+@ToString
 public class Ride {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+   // @Column(name = "ride_id")
     private Long rideId;
 
     private Long riderId;
     private Long driverId;
 
-    // Location Data
     private double pickupLat;
     private double pickupLng;
     private String pickupAddress;
     private String dropAddress;
 
     @Enumerated(EnumType.STRING)
-    private RideStatus status; // SEARCHING, ACCEPTED, ARRIVED, IN_PROGRESS, COMPLETED
+    private RideStatus status;
 
     private double price;
+
+    @CreationTimestamp
     private LocalDateTime createdTime;
+
+    // Default Constructor
+    public Ride() {}
+
+    // ⚠️ Hibernate සඳහා නිවැරදි equals/hashCode (ID එක මත පමණක්)
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Ride ride = (Ride) o;
+        return rideId != null && Objects.equals(rideId, ride.rideId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

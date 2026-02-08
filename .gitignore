@@ -1,8 +1,13 @@
 creds.txt
-<<<<<<< Updated upstream
 
 # Implementation plans and walkthroughs
 .workflows/
-=======
 *.workflows
->>>>>>> Stashed changes
+
+# Documentation directory
+docs/
+
+# Markdown files (ignore all except README.md)
+*.md
+!README.md
+!**/README.md
