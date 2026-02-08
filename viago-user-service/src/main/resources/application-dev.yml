@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/}${DB_NAME:viago_user_db}
+    url: jdbc:mysql://localhost:3306/viago_user_db
     username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:}
+    password: ${DB_PASSWORD:mysql}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -13,5 +13,3 @@ spring:
       hibernate:
         format_sql: true
 
-  profiles:
-    active: dev

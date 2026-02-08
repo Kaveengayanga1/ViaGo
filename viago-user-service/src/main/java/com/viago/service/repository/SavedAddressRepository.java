@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface SavedAddressRepository extends JpaRepository<SavedAddressEntity, Long> {
 
-    List<SavedAddressEntity> findByUserId(Long userId);
+    List<SavedAddressEntity> findByUser_UserId(Long userId);
 }

@@ -1,5 +1,7 @@
 package com.viago.service.entity;
 
+import com.viago.service.dto.DriverStatus;
+import com.viago.service.dto.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,6 +56,23 @@ public class UserEntity {
     @Column(nullable = false)
     @Builder.Default
     private Boolean isPhoneVerified = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Builder.Default
+    private Role role = Role.RIDER;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private DriverStatus driverStatus;
+
+    @Column
+    @Builder.Default
+    private Double averageRating = 0.0;
+
+    @Column
+    @Builder.Default
+    private Integer totalRatings = 0;
 
     // Audit fields
     @CreationTimestamp

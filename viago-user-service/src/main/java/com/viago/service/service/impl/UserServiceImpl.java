@@ -8,11 +8,13 @@ import com.viago.service.dto.request.UserUpdateDTO;
 import com.viago.service.dto.response.*;
 import com.viago.service.entity.ReviewEntity;
 import com.viago.service.entity.UserEntity;
+import com.viago.service.entity.UserStatisticsEntity;
 import com.viago.service.entity.VehicleEntity;
 import com.viago.service.exception.BadRequestException;
 import com.viago.service.exception.ResourceNotFoundException;
 import com.viago.service.repository.ReviewRepository;
 import com.viago.service.repository.UserRepository;
+import com.viago.service.repository.UserStatisticsRepository;
 import com.viago.service.repository.VehicleRepository;
 import com.viago.service.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +35,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final VehicleRepository vehicleRepository;
     private final ReviewRepository reviewRepository;
+    private final UserStatisticsRepository userStatisticsRepository;
 
     @Override
     public UserResponse<UserProfileDTO> getUserProfile(Long userId) {
@@ -66,11 +71,23 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        if (dto.getName() != null) {
-            user.setName(dto.getName());
+        if (dto.getFirstName() != null) {
+            user.setFirstName(dto.getFirstName());
         }
-        if (dto.getPhone() != null) {
-            user.setPhone(dto.getPhone());
+        if (dto.getLastName() != null) {
+            user.setLastName(dto.getLastName());
+        }
+        if (dto.getPhoneNumber() != null) {
+            user.setPhoneNumber(dto.getPhoneNumber());
+        }
+        if (dto.getProfilePictureUrl() != null) {
+            user.setProfilePictureUrl(dto.getProfilePictureUrl());
+        }
+        if (dto.getPreferredLanguage() != null) {
+            user.setPreferredLanguage(dto.getPreferredLanguage());
+        }
+        if (dto.getTimezone() != null) {
+            user.setTimezone(dto.getTimezone());
         }
 
         UserEntity updatedUser = userRepository.save(user);
@@ -210,7 +227,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse<VehicleDTO> getDriverVehicle(Long userId) {
-        VehicleEntity vehicle = vehicleRepository.findByUserId(userId)
+        VehicleEntity vehicle = vehicleRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No vehicle found for user: " + userId));
 
         VehicleDTO vehicleDTO = mapToVehicleDTO(vehicle);
@@ -224,7 +241,7 @@ public class UserServiceImpl implements UserService {
 
     // Helper methods
     private void updateUserAverageRating(UserEntity user) {
-        List<ReviewEntity> reviews = reviewRepository.findByRatedUserId(user.getId());
+        List<ReviewEntity> reviews = reviewRepository.findByRatedUserId(user.getUserId());
 
         if (!reviews.isEmpty()) {
             double average = reviews.stream()
@@ -239,11 +256,18 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserProfileDTO mapToUserProfileDTO(UserEntity user) {
+        // Combine firstName and lastName for name, or use firstName if lastName is null
+        String fullName = (user.getFirstName() != null ? user.getFirstName() : "") +
+                (user.getLastName() != null ? " " + user.getLastName() : "").trim();
+        if (fullName.isEmpty()) {
+            fullName = user.getEmail() != null ? user.getEmail().split("@")[0] : "User";
+        }
+
         return UserProfileDTO.builder()
-                .id(user.getId())
+                .id(user.getUserId())
                 .email(user.getEmail())
-                .name(user.getName())
-                .phone(user.getPhone())
+                .name(fullName)
+                .phone(user.getPhoneNumber())
                 .role(user.getRole())
                 .driverStatus(user.getDriverStatus())
                 .averageRating(user.getAverageRating())
@@ -268,7 +292,125 @@ public class UserServiceImpl implements UserService {
                 .model(vehicle.getModel())
                 .plateNumber(vehicle.getPlateNumber())
                 .color(vehicle.getColor())
-                .userId(vehicle.getUser().getId())
+                .userId(vehicle.getUser().getUserId())
                 .build();
+    }
+
+    // ===== Trip Service Integration Methods =====
+
+    @Override
+    public TripServiceUserDTO getUserForTripService(Long userId) {
+        log.info("Fetching user details for trip service: userId={}", userId);
+        
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        
+        return mapToTripServiceUserDTO(user);
+    }
+
+    @Override
+    public TripServiceUserDTO getDriverForTripService(Long driverId) {
+        log.info("Fetching driver details for trip service: driverId={}", driverId);
+        
+        UserEntity driver = userRepository.findById(driverId)
+                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + driverId));
+        
+        // Validate that user is a driver
+        if (driver.getRole() != Role.DRIVER) {
+            throw new BadRequestException("User with id " + driverId + " is not a driver");
+        }
+        
+        return mapToTripServiceUserDTO(driver);
+    }
+
+    @Override
+    public TripServiceUserDTO getRiderForTripService(Long riderId) {
+        log.info("Fetching rider details for trip service: riderId={}", riderId);
+        
+        UserEntity rider = userRepository.findById(riderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Rider not found with id: " + riderId));
+        
+        // Validate that user is a rider
+        if (rider.getRole() != Role.RIDER) {
+            throw new BadRequestException("User with id " + riderId + " is not a rider");
+        }
+        
+        return mapToTripServiceUserDTO(rider);
+    }
+
+    @Override
+    public UserRoleResponseDTO getUserRole(Long userId) {
+        log.info("Fetching user role for trip service: userId={}", userId);
+        
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        
+        return UserRoleResponseDTO.builder()
+                .userId(user.getUserId())
+                .role(user.getRole().name())
+                .isActive(user.getIsActive())
+                .isVerified(user.getIsEmailVerified() || user.getIsPhoneVerified())
+                .build();
+    }
+
+    @Override
+    public List<TripServiceUserDTO> getUsersBatch(List<Long> userIds) {
+        log.info("Fetching batch users for trip service: count={}", userIds.size());
+        
+        List<UserEntity> users = userRepository.findAllById(userIds);
+        
+        return users.stream()
+                .map(this::mapToTripServiceUserDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Map UserEntity to TripServiceUserDTO with all required fields
+     */
+    private TripServiceUserDTO mapToTripServiceUserDTO(UserEntity user) {
+        // Combine firstName and lastName
+        String fullName = buildFullName(user);
+        
+        // Get vehicle details if user is a driver
+        VehicleEntity vehicle = null;
+        if (user.getRole() == Role.DRIVER) {
+            vehicle = vehicleRepository.findByUser_UserId(user.getUserId()).orElse(null);
+        }
+        
+        // Get statistics
+        UserStatisticsEntity statistics = userStatisticsRepository.findByUserId(user.getUserId())
+                .orElse(null);
+        
+        return TripServiceUserDTO.builder()
+                .id(user.getUserId())
+                .name(fullName)
+                .phone(user.getPhoneNumber())
+                .email(user.getEmail())
+                .role(user.getRole().name())
+                .isActive(user.getIsActive())
+                .isVerified(user.getIsEmailVerified() || user.getIsPhoneVerified())
+                .vehicleNo(vehicle != null ? vehicle.getPlateNumber() : null)
+                .vehicleModel(vehicle != null ? vehicle.getModel() : null)
+                .licenseNo(null) // Can be added to UserEntity if needed
+                .rating(statistics != null ? statistics.getAverageRating() : user.getAverageRating())
+                .totalTrips(statistics != null ? statistics.getTotalTrips() : 0)
+                .build();
+    }
+
+    /**
+     * Build full name from first and last name
+     */
+    private String buildFullName(UserEntity user) {
+        String fullName = "";
+        if (user.getFirstName() != null && !user.getFirstName().isEmpty()) {
+            fullName = user.getFirstName();
+        }
+        if (user.getLastName() != null && !user.getLastName().isEmpty()) {
+            fullName = fullName.isEmpty() ? user.getLastName() : fullName + " " + user.getLastName();
+        }
+        if (fullName.isEmpty() && user.getEmail() != null) {
+            fullName = user.getEmail().split("@")[0];
+        }
+        return fullName.isEmpty() ? "User" : fullName.trim();
     }
 }
