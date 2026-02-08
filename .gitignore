@@ -6,3 +6,6 @@ creds.txt
 
 # Documentation directory
 docs/
+
+# Markdown files
+*.md
