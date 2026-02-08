@@ -116,4 +116,19 @@ public class RideManagementService {
     public Long getRiderId(Long rideId) {
         return rideRepository.findById(rideId).map(Ride::getRiderId).orElse(null);
     }
+
+    @Transactional
+    public void completeRide(Long rideId) {
+        log.info("🏁 Completing ride: {}", rideId);
+        
+        Optional<Ride> rideOpt = rideRepository.findById(rideId);
+        if (rideOpt.isPresent()) {
+            Ride ride = rideOpt.get();
+            ride.setStatus(RideStatus.COMPLETED);
+            rideRepository.save(ride);
+            log.info("✅ Ride {} marked as COMPLETED", rideId);
+        } else {
+            log.error("❌ Ride {} not found for completion", rideId);
+        }
+    }
 }
