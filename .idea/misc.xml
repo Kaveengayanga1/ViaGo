@@ -10,14 +10,11 @@
         <option value="$PROJECT_DIR$/viago-service-discovery/pom.xml" />
         <option value="$PROJECT_DIR$/trip-service/pom.xml" />
         <option value="$PROJECT_DIR$/viago-trip-service/pom.xml" />
-        <option value="$PROJECT_DIR$/viago-matching-service/pom.xml" />
-        <option value="$PROJECT_DIR$/viago-matching-services/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
       <set>
         <option value="$PROJECT_DIR$/trip-service/pom.xml" />
-        <option value="$PROJECT_DIR$/viago-matching-service/pom.xml" />
       </set>
     </option>
   </component>
