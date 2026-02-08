@@ -18,7 +18,7 @@ import java.util.Objects;
 public class Ride {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ride_id")
+   // @Column(name = "ride_id")
     private Long rideId;
 
     private Long riderId;
