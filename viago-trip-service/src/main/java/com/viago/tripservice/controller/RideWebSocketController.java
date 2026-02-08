@@ -1,6 +1,5 @@
 package com.viago.tripservice.controller;
 
-
 import com.viago.tripservice.dto.*;
 import com.viago.tripservice.model.Ride;
 import com.viago.tripservice.service.DriverMatchingService;
@@ -16,21 +15,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @CrossOrigin
 @RequestMapping("api/trips")
 public class RideWebSocketController {
     private static final Logger log = LoggerFactory.getLogger(RideWebSocketController.class);
-    
+
     private final RideManagementService rideService;
     private final DriverMatchingService matchingService;
     private final UserIntegrationService userIntegrationService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    public RideWebSocketController(RideManagementService rideService, 
+    // Cache
+    private final ConcurrentHashMap<Long, Long> rideToRiderCache = new ConcurrentHashMap<>();
+
+    public RideWebSocketController(RideManagementService rideService,
                                    DriverMatchingService matchingService,
-                                   UserIntegrationService userIntegrationService, 
+                                   UserIntegrationService userIntegrationService,
                                    SimpMessagingTemplate messagingTemplate) {
         this.rideService = rideService;
         this.matchingService = matchingService;
@@ -40,8 +43,6 @@ public class RideWebSocketController {
 
     @MessageMapping("/driver-update")
     public void updateDriverLocation(@Payload LocationUpdateDto loc) {
-        log.info("📍 Driver location updated: driverId={}, lat={}, lng={}", 
-                 loc.getDriverId(), loc.getLat(), loc.getLng());
         matchingService.updateLocation(loc.getDriverId(), loc.getLat(), loc.getLng());
     }
 
@@ -51,84 +52,89 @@ public class RideWebSocketController {
 
         Ride ride = rideService.createRide(request);
         Long tripId = ride.getRideId();
-        log.info("✅ Ride created successfully: rideId={}", tripId);
 
+        rideToRiderCache.put(tripId, request.getRiderId());
+        log.info("💾 Ride {} cached and committed, ready for driver acceptance", tripId);
 
-        messagingTemplate.convertAndSend(
-                "/topic/ride-status/" + request.getRiderId(),
-                new TripUpdate("SEARCHING", tripId, null)
-        );
-        log.info("📤 Sending SEARCHING status to /topic/ride-status/{}", request.getRiderId());
+        // Notify Rider: SEARCHING
+        messagingTemplate.convertAndSend("/topic/ride-status/" + request.getRiderId(),
+                new TripUpdate("SEARCHING", tripId, null));
 
-
-        log.info("🔍 Finding nearby drivers for location: lat={}, lng={}", 
-                 request.getPickupLat(), request.getPickupLng());
+        // Find Drivers
         List<Long> nearbyDrivers = matchingService.findNearbyDrivers(request.getPickupLat(), request.getPickupLng());
-        log.info("✅ Found {} nearby driver(s): {}", nearbyDrivers.size(), nearbyDrivers);
 
         if (nearbyDrivers.isEmpty()) {
             log.warn("⚠️ No nearby drivers found for ride: {}", tripId);
         }
 
-        // D. Drivers ලාට Offer එක යවනවා (Trip ID එකත් එක්කම!)
-        RideOffer offer = new RideOffer(
-                tripId, 
-                request.getRiderName(), 
-                request.getPickupAddress(), 
-                request.getDropAddress(), 
-                request.getPrice(), 
-                request.getPickupLat(), 
-                request.getPickupLng()
-        );
+        // Notify Drivers
+        RideOffer offer = new RideOffer(tripId, request.getRiderName(), request.getPickupAddress(),
+                request.getDropAddress(), request.getPrice(), request.getPickupLat(), request.getPickupLng());
+
         for (Long driverId : nearbyDrivers) {
-            log.info("📤 Sending ride offer to /topic/driver-offers/{} (rideId={})", driverId, tripId);
-            messagingTemplate.convertAndSend(
-                    "/topic/driver-offers/" + driverId,
-                    offer
-            );
+            messagingTemplate.convertAndSend("/topic/driver-offers/" + driverId, offer);
         }
     }
 
-@MessageMapping("/accept-ride")
-
-public void acceptRide(@Payload DriverAction action) {
-    log.info("🤝 Driver {} attempting to accept ride: {}", action.getDriverId(), action.getRideId());
-
-    boolean success = rideService.assignDriver(action.getRideId(), action.getDriverId());
-
-    if (success) {
-        log.info("✅ Ride {} successfully assigned to driver {}", action.getRideId(), action.getDriverId());
-
-        // Get driver details from user service
-        UserDetailsDto driverDetails = userIntegrationService.getDriverDetails(action.getDriverId());
-        log.info("📋 Driver details retrieved: name={}, vehicle={}, phone={}", 
-                 driverDetails.getFullName(), driverDetails.getVehicleModel(), driverDetails.getPhoneNumber());
-
-        // Get rider ID
-        Long riderId = rideService.getRiderId(action.getRideId());
+    @MessageMapping("/accept-ride")
+    public void acceptRide(@Payload DriverAction action) {
+        log.info("🤝 Driver {} attempting to accept ride: {}", action.getDriverId(), action.getRideId());
         
-        // Create trip update with driver details
-        TripUpdate update = new TripUpdate("DRIVER_FOUND", action.getRideId(), driverDetails);
-        
-        log.info("📤 Sending DRIVER_FOUND to /topic/ride-status/{} with driver details", riderId);
-        log.info("📦 Payload: status=DRIVER_FOUND, rideId={}, driverName={}", 
-                 action.getRideId(), driverDetails.getFullName());
-        
-        messagingTemplate.convertAndSend(
-                "/topic/ride-status/" + riderId,
-                update
-        );
-        
-        log.info("✅ DRIVER_FOUND notification sent successfully to rider {}", riderId);
-    } else {
-        log.warn("❌ Ride {} already taken, notifying /topic/driver-notify/{}", action.getRideId(), action.getDriverId());
+        // Check cache first
+        Long cachedRiderId = rideToRiderCache.get(action.getRideId());
+        if (cachedRiderId != null) {
+            log.info("💾 Found ride {} in cache, mapped to rider {}", action.getRideId(), cachedRiderId);
+        } else {
+            log.warn("⚠️ Ride {} NOT found in cache", action.getRideId());
+        }
 
-        messagingTemplate.convertAndSend(
-                "/topic/driver-notify/" + action.getDriverId(),
-                "RIDE_TAKEN"
-        );
+        boolean success = rideService.assignDriver(action.getRideId(), action.getDriverId());
+
+        if (success) {
+            log.info("✅ assignDriver returned SUCCESS for ride {}", action.getRideId());
+            
+            // Get Driver Details (for controller-level notification if needed)
+            UserDetailsDto driverDetails = userIntegrationService.getUserDetails(action.getDriverId());
+            
+            if (driverDetails != null) {
+                log.info("📋 Controller: Driver details - name={}, vehicle={}, phone={}", 
+                         driverDetails.getName(), driverDetails.getVehicleNo(), driverDetails.getPhone());
+            }
+
+            // Get Rider ID
+            Long riderId = rideToRiderCache.get(action.getRideId());
+            if (riderId == null) {
+                log.warn("⚠️ Rider ID not in cache, fetching from database");
+                riderId = rideService.getRiderId(action.getRideId());
+            }
+
+            if (riderId != null) {
+                log.info("✅ Rider ID confirmed: {}", riderId);
+                
+                // Send TripUpdate (controller-level notification)
+                TripUpdate update = new TripUpdate("DRIVER_FOUND", action.getRideId(), driverDetails);
+
+                log.info("📤 Controller: Sending TripUpdate to /topic/ride-status/{}", riderId);
+                log.info("📦 TripUpdate payload: status=DRIVER_FOUND, rideId={}, driverData={}", 
+                         action.getRideId(), (driverDetails != null ? driverDetails.getName() : "null"));
+
+                messagingTemplate.convertAndSend("/topic/ride-status/" + riderId, update);
+                
+                log.info("✅ Controller: TripUpdate sent successfully");
+
+                // Notify Driver (Success)
+                messagingTemplate.convertAndSend("/topic/driver-notify/" + action.getDriverId(), "SUCCESS");
+                log.info("✅ Driver {} notified of success", action.getDriverId());
+
+                rideToRiderCache.remove(action.getRideId());
+                log.info("🗑️ Removed ride {} from cache", action.getRideId());
+            } else {
+                log.error("❌ CRITICAL: Could not determine rider ID for ride {}", action.getRideId());
+            }
+        } else {
+            log.warn("❌ assignDriver returned FAILURE for ride {}", action.getRideId());
+            messagingTemplate.convertAndSend("/topic/driver-notify/" + action.getDriverId(), "RIDE_TAKEN");
+            rideToRiderCache.remove(action.getRideId());
+        }
     }
-}
-
-
 }
