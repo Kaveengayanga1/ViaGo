@@ -58,4 +58,8 @@ public class NotificationController {
                     .body("Failed to queue notification: " + e.getMessage());
         }
     }
+    @GetMapping
+    public String test(){
+        return "test";
+    }
 }
