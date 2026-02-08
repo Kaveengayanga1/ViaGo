@@ -19,6 +19,8 @@ import com.viago.service.repository.VehicleRepository;
 import com.viago.service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.viago.service.service.UserPreferenceService;
+import com.viago.service.service.UserStatisticsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +38,43 @@ public class UserServiceImpl implements UserService {
     private final VehicleRepository vehicleRepository;
     private final ReviewRepository reviewRepository;
     private final UserStatisticsRepository userStatisticsRepository;
+    private final UserPreferenceService userPreferenceService;
+    private final UserStatisticsService userStatisticsService;
+
+    @Override
+    @Transactional
+    public UserResponse<UserProfileDTO> createUser(UserProfileDTO userDTO) {
+        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+            throw new BadRequestException("User already exists with email: " + userDTO.getEmail());
+        }
+
+        UserEntity user = UserEntity.builder()
+                .email(userDTO.getEmail())
+                .firstName(userDTO.getName() != null ? userDTO.getName().split(" ")[0] : "User")
+                .lastName(userDTO.getName() != null && userDTO.getName().contains(" ")
+                        ? userDTO.getName().substring(userDTO.getName().indexOf(" ") + 1)
+                        : "")
+                .phoneNumber(userDTO.getPhone())
+                .role(userDTO.getRole() != null ? userDTO.getRole() : Role.RIDER)
+                .isActive(true)
+                .isEmailVerified(false)
+                .isPhoneVerified(false)
+                .build();
+
+        UserEntity savedUser = userRepository.save(user);
+
+        // Initialize related entities
+        userPreferenceService.createDefaultPreferences(savedUser.getUserId());
+        userStatisticsService.createDefaultStatistics(savedUser.getUserId());
+
+        log.info("User created successfully: {}", savedUser.getUserId());
+
+        return UserResponse.<UserProfileDTO>builder()
+                .success(true)
+                .message("User created successfully")
+                .data(mapToUserProfileDTO(savedUser))
+                .build();
+    }
 
     @Override
     public UserResponse<UserProfileDTO> getUserProfile(Long userId) {
@@ -301,50 +340,50 @@ public class UserServiceImpl implements UserService {
     @Override
     public TripServiceUserDTO getUserForTripService(Long userId) {
         log.info("Fetching user details for trip service: userId={}", userId);
-        
+
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
-        
+
         return mapToTripServiceUserDTO(user);
     }
 
     @Override
     public TripServiceUserDTO getDriverForTripService(Long driverId) {
         log.info("Fetching driver details for trip service: driverId={}", driverId);
-        
+
         UserEntity driver = userRepository.findById(driverId)
                 .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + driverId));
-        
+
         // Validate that user is a driver
         if (driver.getRole() != Role.DRIVER) {
             throw new BadRequestException("User with id " + driverId + " is not a driver");
         }
-        
+
         return mapToTripServiceUserDTO(driver);
     }
 
     @Override
     public TripServiceUserDTO getRiderForTripService(Long riderId) {
         log.info("Fetching rider details for trip service: riderId={}", riderId);
-        
+
         UserEntity rider = userRepository.findById(riderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Rider not found with id: " + riderId));
-        
+
         // Validate that user is a rider
         if (rider.getRole() != Role.RIDER) {
             throw new BadRequestException("User with id " + riderId + " is not a rider");
         }
-        
+
         return mapToTripServiceUserDTO(rider);
     }
 
     @Override
     public UserRoleResponseDTO getUserRole(Long userId) {
         log.info("Fetching user role for trip service: userId={}", userId);
-        
+
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
-        
+
         return UserRoleResponseDTO.builder()
                 .userId(user.getUserId())
                 .role(user.getRole().name())
@@ -356,9 +395,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<TripServiceUserDTO> getUsersBatch(List<Long> userIds) {
         log.info("Fetching batch users for trip service: count={}", userIds.size());
-        
+
         List<UserEntity> users = userRepository.findAllById(userIds);
-        
+
         return users.stream()
                 .map(this::mapToTripServiceUserDTO)
                 .collect(Collectors.toList());
@@ -370,17 +409,17 @@ public class UserServiceImpl implements UserService {
     private TripServiceUserDTO mapToTripServiceUserDTO(UserEntity user) {
         // Combine firstName and lastName
         String fullName = buildFullName(user);
-        
+
         // Get vehicle details if user is a driver
         VehicleEntity vehicle = null;
         if (user.getRole() == Role.DRIVER) {
             vehicle = vehicleRepository.findByUser_UserId(user.getUserId()).orElse(null);
         }
-        
+
         // Get statistics
         UserStatisticsEntity statistics = userStatisticsRepository.findByUserId(user.getUserId())
                 .orElse(null);
-        
+
         return TripServiceUserDTO.builder()
                 .id(user.getUserId())
                 .name(fullName)
