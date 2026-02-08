@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f5b9d749-7130-4b3b-ab86-6673ba9cbedc" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.vscode/launch.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/client/NotificationServiceClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/config/FeignClientConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/dto/request/NotificationRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-auth/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/viago-auth/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/config/OAuth2SignupSuccessHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/config/OAuth2SignupSuccessHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/config/RabbitMQConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/config/RabbitMQConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/service/impl/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/viago-auth/src/main/java/com/viago/auth/service/impl/UserServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-notification-service/src/main/java/com/viago/service/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/viago-notification-service/src/main/java/com/viago/service/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viago-notification-service/src/main/java/com/viago/service/enums/NotificationType.java" beforeDir="false" afterPath="$PROJECT_DIR$/viago-notification-service/src/main/java/com/viago/service/enums/NotificationType.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="39IQe3rVYxWu8wjfMk1TW2w8cCD" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.Main.executor": "Run",
+    "git-widget-placeholder": "Merging deploy",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/becs/year_03/semester_06/becs_32263_full_stack/project/ViaGO/backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "run.configurations.included.in.services": "true",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="MicronautRunConfigurationType" />
+        <option value="QuarkusRunConfigurationType" />
+        <option value="SpringBootApplicationConfigurationType" />
+      </set>
+    </option>
+  </component>
+  <component name="RunManager" selected="Spring Boot.Main">
+    <configuration name="Main (1)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="ViaGO-Auth" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.viago.auth.Main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Main (2)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="viago-service-discovery" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.viago.service.Main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Main" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="viago-admin-services" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.viago.adminservices.Main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9f38398b9061-39b83d9b5494-intellij.indexing.shared.core-IU-241.15989.150" />
+        <option value="bundled-js-predefined-1d06a55b98c1-91d5c284f522-JavaScript-IU-241.15989.150" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f5b9d749-7130-4b3b-ab86-6673ba9cbedc" name="Changes" comment="" />
+      <created>1770381196809</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1770381196809</updated>
+      <workItem from="1770381198109" duration="2025000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
