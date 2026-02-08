@@ -35,7 +35,7 @@ public class AdminUserController {
 
     @GetMapping("/test")
     public String test() {
-        return "test success: viago-admin-services";
+        return "test success: viago-admin-services check pipeline";
     }
 
     @GetMapping
