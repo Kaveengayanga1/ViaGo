@@ -70,34 +70,6 @@ public class OAuth2SignupSuccessHandler extends SimpleUrlAuthenticationSuccessHa
                 user.setProviderId(providerId);
                 userRepository.save(user);
                 
-                // Send welcome email notification via Feign client - don't fail linking if this fails
-                try {
-                    if (notificationServiceClient != null) {
-                        // Use name from OAuth or fallback to username, template expects "name" field
-                        String displayName = name != null && !name.isEmpty() 
-                                ? name 
-                                : (user.getUsername() != null ? user.getUsername() : "User");
-                        
-                        NotificationRequest notificationRequest = new NotificationRequest(
-                                email,
-                                "WELCOME",
-                                Map.of(
-                                        "name", displayName,  // Template expects "name" field
-                                        "username", user.getUsername() != null ? user.getUsername() : "User",
-                                        "email", email
-                                ));
-
-                        notificationServiceClient.sendNotification(notificationRequest);
-                        log.info("Welcome email notification sent via Feign client for OAuth account linking: {}", email);
-                    } else {
-                        log.warn("NotificationServiceClient not available - welcome email skipped for OAuth account linking: {}", email);
-                    }
-                } catch (Exception e) {
-                    // Log but don't fail account linking
-                    log.error("Failed to send welcome email notification for OAuth account linking {} - continuing: {}", 
-                            email, e.getMessage(), e);
-                }
-                
                 // Generate JWT and return
                 UserDTO userDTO = objectMapper.convertValue(user, UserDTO.class);
                 userDTO.setPassword(null);
