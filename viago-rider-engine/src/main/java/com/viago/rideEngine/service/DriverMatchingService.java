@@ -7,4 +7,3 @@ public interface DriverMatchingService {
     Object rejectTrip(String driverId, String tripId, String reason);
     Object getNearbyTripRequests(String driverId, double radiusKm);
 }
-

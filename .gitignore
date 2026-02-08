@@ -1,0 +1,16 @@
+creds.txt
+
+# Implementation plans and walkthroughs
+.workflows/
+*.workflows
+
+# Documentation directory
+docs/
+
+# Markdown files (ignore all except README.md)
+*.md
+!README.md
+!**/README.md
+
+.idea/
+.vscode/

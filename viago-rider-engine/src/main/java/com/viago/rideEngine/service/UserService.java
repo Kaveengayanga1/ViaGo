@@ -14,4 +14,3 @@ public interface UserService {
     void deleteSavedAddress(String userId, String addressId);
     Object updateProfilePicture(String userId, String pictureUrl);
 }
-
