@@ -60,6 +60,6 @@ public class NotificationController {
     }
     @GetMapping
     public String test(){
-        return "test";
+        return "test test";
     }
 }
