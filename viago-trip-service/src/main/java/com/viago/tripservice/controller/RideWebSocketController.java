@@ -11,7 +11,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,10 +45,7 @@ public class RideWebSocketController {
     public void updateDriverLocation(@Payload LocationUpdateDto loc) {
         matchingService.updateLocation(loc.getDriverId(), loc.getLat(), loc.getLng());
     }
-    @GetMapping
-    public String test(){
-        return "test";
-    }
+
 
     @MessageMapping("/request-ride")
     public void requestRide(@Payload RideRequest request) {
