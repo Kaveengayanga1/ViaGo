@@ -224,7 +224,7 @@ public class UserServiceImpl implements UserService {
 
     // Helper methods
     private void updateUserAverageRating(UserEntity user) {
-        List<ReviewEntity> reviews = reviewRepository.findByRatedUserId(user.getId());
+        List<ReviewEntity> reviews = reviewRepository.findByRatedUserId(user.getUserId());
 
         if (!reviews.isEmpty()) {
             double average = reviews.stream()
@@ -239,11 +239,18 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserProfileDTO mapToUserProfileDTO(UserEntity user) {
+        // Combine firstName and lastName for name, or use firstName if lastName is null
+        String fullName = (user.getFirstName() != null ? user.getFirstName() : "") +
+                (user.getLastName() != null ? " " + user.getLastName() : "").trim();
+        if (fullName.isEmpty()) {
+            fullName = user.getEmail() != null ? user.getEmail().split("@")[0] : "User";
+        }
+
         return UserProfileDTO.builder()
-                .id(user.getId())
+                .id(user.getUserId())
                 .email(user.getEmail())
-                .name(user.getName())
-                .phone(user.getPhone())
+                .name(fullName)
+                .phone(user.getPhoneNumber())
                 .role(user.getRole())
                 .driverStatus(user.getDriverStatus())
                 .averageRating(user.getAverageRating())
@@ -268,7 +275,7 @@ public class UserServiceImpl implements UserService {
                 .model(vehicle.getModel())
                 .plateNumber(vehicle.getPlateNumber())
                 .color(vehicle.getColor())
-                .userId(vehicle.getUser().getId())
+                .userId(vehicle.getUser().getUserId())
                 .build();
     }
 }
